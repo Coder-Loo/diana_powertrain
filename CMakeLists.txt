@@ -143,6 +143,29 @@ target_link_libraries(test_motor
    pci7841_card
  )
 
+add_library(command_line
+  src/command_line.cpp
+)
+
+target_link_libraries(command_line
+   ${catkin_LIBRARIES}
+   ${Boost_LIBRARIES}
+   ${hlcanopen_LIBRARIES}
+   pci7841_card
+ )
+
+add_executable(shell
+  src/shell.cpp
+)
+
+target_link_libraries(shell
+   ${catkin_LIBRARIES}
+   ${Boost_LIBRARIES}
+   ${hlcanopen_LIBRARIES}
+   pci7841_card
+   command_line
+ )
+
 install(TARGETS pci7841_card
  DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
@@ -152,6 +175,14 @@ install(TARGETS diana_powertrain_node
 )
 
 install(TARGETS test_motor
+ DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(TARGETS command_line
+ DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(TARGETS shell
  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
