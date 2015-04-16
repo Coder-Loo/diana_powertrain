@@ -7,6 +7,18 @@ extern "C" {
   #include "pci_7841.h"
 }
 
+enum Pci7841Mode {
+  BIT11 = 0,
+  BIT29 = 1
+};
+
+enum Pci7841Baudrate {
+  BAUDRATE_125KB = 0,
+  BAUDRATE_250KB = 1,
+  BAUDRATE_500KB = 2,
+  BAUDRATE_1MB = 3
+};
+
 class Pci7841Card {
 
 public:

@@ -7,6 +7,16 @@
 Pci7841Card::Pci7841Card(int cardNum, int portNum)
 {
   handle = CanOpenDriver(cardNum, portNum);
+  if(handle < 0) {
+    LOG(ERROR) << "Unable to open driver" << cardNum << ":" << portNum;
+  } else {
+    PORT_STRUCT setPort;
+    setPort.mode = BIT11;
+    setPort.accCode = 0;
+    setPort.accMask = 0x7EE;
+    setPort.baudrate = BAUDRATE_500KB;
+    CanConfigPort(handle, &setPort);
+  }
 }
 
 Pci7841Card::Pci7841Card(const Pci7841Card& r) : handle(r.handle)

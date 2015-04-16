@@ -13,4 +13,6 @@ int main(int argc, char** argv) {
   Pci7841Card card(0, 0);
   PowertrainManager<Pci7841Card> manager(card);
 
+  manager.initiate_clients();
+  manager.run();
 }
