@@ -1,4 +1,4 @@
-#include "diana_powertrain/pci7841_card.h"
+#include "diana_powertrain/pci7841_card.hpp"
 
 #include <hlcanopen/logging/easylogging++.h>
 #include <string>

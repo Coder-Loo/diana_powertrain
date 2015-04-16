@@ -2,7 +2,7 @@
 #include <string>
 
 #include "diana_powertrain/powertrain_manager.hpp"
-#include "diana_powertrain/pci7841_card.h"
+#include "diana_powertrain/pci7841_card.hpp"
 
 INITIALIZE_EASYLOGGINGPP
 

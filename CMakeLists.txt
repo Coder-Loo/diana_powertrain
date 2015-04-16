@@ -15,10 +15,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  team_diana_lib
 )
 
 ## System dependencies are found with CMake's conventions
-find_package(Boost REQUIRED COMPONENTS system coroutine)
+find_package(Boost REQUIRED COMPONENTS system coroutine program_options)
 find_package(hlcanopen REQUIRED)
 
 ################################################
@@ -109,42 +110,49 @@ include_directories(
 
 ## Declare a cpp executable
 
-FILE(GLOB diana_powertrain_sources "src/*.cpp")
+add_library(pci7841_card
+  src/pci7841_card.cpp
+)
+
+target_link_libraries(pci7841_card
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${hlcanopen_LIBRARIES}
+  pci_7841
+)
 
 add_executable(diana_powertrain_node
-  ${diana_powertrain_sources}
-  )
+  src/diana_powertrain_node.cpp
+)
 
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
-#add_dependencies(diana_powertrain_node diana_powertrain_generate_messages_cpp)
-
-## Specify libraries to link a library or executable target against
- target_link_libraries(diana_powertrain_node
+target_link_libraries(diana_powertrain_node
    ${catkin_LIBRARIES}
    ${Boost_LIBRARIES}
    ${hlcanopen_LIBRARIES}
-   pci_7841
+   pci7841_card
  )
 
-#############
-## Install ##
-#############
+add_executable(test_motor
+  src/test_motor.cpp
+)
 
-# all install targets should use catkin DESTINATION variables
-# See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
+target_link_libraries(test_motor
+   ${catkin_LIBRARIES}
+   ${Boost_LIBRARIES}
+   ${hlcanopen_LIBRARIES}
+   pci7841_card
+ )
 
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(TARGETS pci7841_card
+ DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
 
-## Mark executables and/or libraries for installation
 install(TARGETS diana_powertrain_node
- ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
- RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+ DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(TARGETS test_motor
+ DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 ## Mark cpp header files for installation
