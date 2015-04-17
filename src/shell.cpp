@@ -54,7 +54,9 @@ int main(int argc, char** argv) {
   hlcanopen::CanOpenManager<Pci7841Card> canOpenManager(card);
 
   int motorId = 0;
-  parseCommandLine(argc, argv, motorId);
+  if(!parseCommandLine(argc, argv, motorId)) {
+    return -1;
+  }
 
   canOpenManager.initNode(motorId, hlcanopen::NodeManagerType::CLIENT);
 
