@@ -110,6 +110,10 @@ include_directories(
 
 ## Declare a cpp executable
 
+add_library(commons
+  src/utils.cpp
+)
+
 add_library(pci7841_card
   src/pci7841_card.cpp
 )
@@ -119,6 +123,7 @@ target_link_libraries(pci7841_card
   ${Boost_LIBRARIES}
   ${hlcanopen_LIBRARIES}
   pci_7841
+  commons
 )
 
 add_executable(diana_powertrain_node
@@ -130,6 +135,7 @@ target_link_libraries(diana_powertrain_node
    ${Boost_LIBRARIES}
    ${hlcanopen_LIBRARIES}
    pci7841_card
+   commons
  )
 
 add_executable(test_motor
@@ -141,6 +147,7 @@ target_link_libraries(test_motor
    ${Boost_LIBRARIES}
    ${hlcanopen_LIBRARIES}
    pci7841_card
+   commons
  )
 
 add_library(command_line
@@ -152,6 +159,7 @@ target_link_libraries(command_line
    ${Boost_LIBRARIES}
    ${hlcanopen_LIBRARIES}
    pci7841_card
+   commons
  )
 
 add_executable(shell
@@ -164,6 +172,7 @@ target_link_libraries(shell
    ${hlcanopen_LIBRARIES}
    pci7841_card
    command_line
+   commons
  )
 
 install(TARGETS pci7841_card

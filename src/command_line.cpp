@@ -1,16 +1,17 @@
 #ifndef COMMAND_LINE_CPP
 #define COMMAND_LINE_CPP
 
-#include "diana_powertrain/command_line.hpp"
+#include <boost/program_options.hpp>
+#include <boost/program_options/options_description.hpp>
 
 #include "team_diana_lib/logging/logging.h"
 #include "team_diana_lib/strings/strings.h"
 
-using namespace boost;
 using namespace boost::program_options;
 using namespace Td;
 
-void prepareParseMotorId(option_description& desc) {
+void prepareParseMotorId(options_description& desc) {
+  using namespace boost::program_options;
   desc.add_options()
     ("motor_id,i", value<int>()->default_value(1)->implicit_value(false), "the CAN id of the motor to test");
 }

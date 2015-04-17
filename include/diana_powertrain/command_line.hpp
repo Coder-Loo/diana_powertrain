@@ -6,7 +6,7 @@
 
 #include <boost/program_options.hpp>
 
-void prepareParseMotorId(boost::program_options::option_description& desc);
+void prepareParseMotorId(boost::program_options::options_description& desc);
 bool parseMotorId(boost::program_options::variables_map& varsMap, int& motorId);
 
 #endif // COMMAND_LINE_HPP

@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
   });
   ros_info("manager thread started");
 
-  canOpenManager.writeSdoRemote</>()
+//   canOpenManager.writeSdoRemote<>()
 
   ros_info("stopping manager thread");
   canOpenManager.stop();

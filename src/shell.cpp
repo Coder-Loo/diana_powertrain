@@ -5,11 +5,14 @@
 #include "diana_powertrain/pci7841_card.hpp"
 #include "diana_powertrain/command_line.hpp"
 #include "diana_powertrain/utils.hpp"
+#include "diana_powertrain/consts.hpp"
 
 #include <team_diana_lib/logging/logging.h>
 #include <team_diana_lib/strings/strings.h>
 
 #include <boost/program_options.hpp>
+#include <boost/program_options/options_description.hpp>
+
 
 
 INITIALIZE_EASYLOGGINGPP
@@ -62,16 +65,14 @@ int main(int argc, char** argv) {
   ros_info("manager thread started");
 
   mssleep(100);
-  canOpenManager.writeSdoRemote<uint32_t>(motorId, Sdo);
-  p.sendSDO(canId, OS_COMMAND_MODE, 0);
+  auto res = canOpenManager.writeSdoRemote<uint32_t>(motorId, OS_COMMAND_MODE, 0);
+
+  if(!res.get().ok()) {
+    ros_error("Unable to set command mode");
+    return -1;
+  }
 
   mssleep(1000);
-  CAN_PACKET res = p.rcvMsg();
-  assertSameData(res, {0x60, 0x24, 0x10, 0,   0, 0, 0, 0});
-
-  mssleep(500);
-  p.cleanBuffers();
-
 
   while(true) {
     string s;
@@ -81,8 +82,12 @@ int main(int argc, char** argv) {
     if(s == "exit" || s == "q") {
       break;
     }
-    std::vector<BYTE> data = stringToVec(s);
-    sendSegmentedData(p, canId, OS_COMMAND_PROMPT, data);
+    auto res = canOpenManager.writeSdoRemote(motorId, OS_COMMAND_MODE, s);
+    if(res.get().ok()) {
+      ros_info("sent new command");
+    } else {
+      ros_error("error while sending new command");
+    }
   }
 
   ros_info("stopping manager thread");
