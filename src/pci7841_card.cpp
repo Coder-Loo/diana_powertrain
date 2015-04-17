@@ -61,7 +61,7 @@ hlcanopen::CanMsg Pci7841Card::read()
     } else {
       LOG(DEBUG) << "receiving data: " <<
         " -- COB-ID:  " << canPacket.CAN_ID <<
-        " can-id:  " << getCanId(canPacket.CAN_ID) << " -- " <<
+        " can-id:  " << getCanId(canPacket.CAN_ID) << " -- data: " <<
         packetDataToStr(canPacket);
     }
   } else {
@@ -92,10 +92,10 @@ std::string Pci7841Card::packetDataToStr(const CAN_PACKET& packet)
   std::stringstream msg;
 
   msg << "<";
-  for(BYTE i =0; i < 7; i++) {
-    msg << std::hex << std::setfill('0') << std::setw(2) << packet.data[i] << ":";
+  for(int i =0; i < 7; i++) {
+    msg << std::hex << std::setfill('0') << std::setw(2) << (unsigned int) packet.data[i] << ":";
   }
-  msg << std::hex << std::setw(2) << (unsigned int) packet.data[7] << ">";
+  msg << std::hex << std::setw(2) << (unsigned int) packet.data[7] << ">" << std::dec;
 
   return msg.str();
 }
