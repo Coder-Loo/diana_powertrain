@@ -13,7 +13,7 @@ using namespace Td;
 void prepareParseMotorId(options_description& desc) {
   using namespace boost::program_options;
   desc.add_options()
-    ("motor_id,i", value<int>()->default_value(1)->implicit_value(false)->required(true), "the CAN id of the motor to test");
+    ("motor_id,i", value<int>()->default_value(1)->implicit_value(false)->required(), "the CAN id of the motor to test");
 }
 
 bool parseMotorId(variables_map& varsMap, int& motorId) {

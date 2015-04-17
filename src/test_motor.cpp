@@ -19,8 +19,7 @@ bool parseCommandLine(int argc, char** argv, int& motorId) {
   using namespace boost::program_options;
   options_description desc("Options");
   desc.add_options()
-    ("help,h", "Print help messages")
-    ("motor_id,i", value<int>()->default_value(1)->implicit_value(false), "the CAN id of the motor to test");
+    ("help,h", "Print help messages");
   variables_map varsMap;
 
   try {
