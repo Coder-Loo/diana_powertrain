@@ -3,6 +3,7 @@
 #include <hlcanopen/logging/easylogging++.h>
 #include <string>
 #include <iostream>
+#include <iomanip>
 
 Pci7841Card::Pci7841Card(int cardNum, int portNum)
 {
@@ -56,14 +57,17 @@ hlcanopen::CanMsg Pci7841Card::read()
 
 
   if (CanRcvMsg(handle, &canPacket) == 0) {
+    if(getCanId(canPacket.CAN_ID) == 0) {
+    } else {
       LOG(DEBUG) << "receiving data: " <<
         " -- COB-ID:  " << canPacket.CAN_ID <<
         " can-id:  " << getCanId(canPacket.CAN_ID) << " -- " <<
         packetDataToStr(canPacket);
-    } else {
-      LOG(DEBUG) << "no data received ";
-      memset(&canPacket, 0, sizeof(canPacket));
     }
+  } else {
+    LOG(DEBUG) << "no data received ";
+    memset(&canPacket, 0, sizeof(canPacket));
+  }
 
    hlcanopen::CanMsg canMsg;
    canMsg.cobId = hlcanopen::COBId(getCanId(canPacket.CAN_ID), getCOBType(canPacket.CAN_ID));
@@ -89,9 +93,9 @@ std::string Pci7841Card::packetDataToStr(const CAN_PACKET& packet)
 
   msg << "<";
   for(BYTE i =0; i < 7; i++) {
-    msg << std::hex << packet.data[i] << ":";
+    msg << std::hex << std::setfill('0') << std::setw(2) << packet.data[i] << ":";
   }
-  msg << std::hex << packet.data[7] << ">";
+  msg << std::hex << std::setw(2) << packet.data[7] << ">";
 
   return msg.str();
 }

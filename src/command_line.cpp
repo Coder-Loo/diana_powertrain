@@ -17,7 +17,7 @@ void prepareParseMotorId(options_description& desc) {
 }
 
 bool parseMotorId(variables_map& varsMap, int& motorId) {
-  if(!varsMap["motor_id"].empty()) {
+  if(!varsMap["motor_id"].empty() && !varsMap["motor_id"].defaulted()) {
     motorId = varsMap["motor_id"].as<int>();
   } else {
     ros_error("No serials specified. Use help to see usage");
