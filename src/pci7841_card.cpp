@@ -93,9 +93,9 @@ std::string Pci7841Card::packetDataToStr(const CAN_PACKET& packet)
 
   msg << "<";
   for(int i =0; i < 7; i++) {
-    msg << std::hex << std::setfill('0') << std::setw(2) << (unsigned int) packet.data[i] << ":";
+    msg << std::hex << std::setw(2) << std::setfill('0')  << (unsigned int) packet.data[i] << ":";
   }
-  msg << std::hex << std::setw(2) << (unsigned int) packet.data[7] << ">" << std::dec;
+  msg << std::hex << std::setw(2) << std::setfill('0') << (unsigned int) packet.data[7] << ">";
 
   return msg.str();
 }

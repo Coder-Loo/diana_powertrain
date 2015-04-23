@@ -19,6 +19,10 @@ void prepareParseMotorId(options_description& desc) {
 bool parseMotorId(variables_map& varsMap, int& motorId) {
   if(!varsMap["motor_id"].empty() && !varsMap["motor_id"].defaulted()) {
     motorId = varsMap["motor_id"].as<int>();
+    if(motorId < 0 || motorId > 127) {
+      ros_error("Motor id must be between >=0 and <=127");
+      return false;
+    }
   } else {
     ros_error("No serials specified. Use help to see usage");
     return false;

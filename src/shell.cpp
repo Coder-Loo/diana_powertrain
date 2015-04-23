@@ -66,7 +66,8 @@ int main(int argc, char** argv) {
   });
   ros_info("manager thread started");
 
-  mssleep(100);
+  canOpenManager.startRemoteNode(motorId);
+  mssleep(1500);
   auto res = canOpenManager.writeSdoRemote<uint32_t>(motorId, OS_COMMAND_MODE, 0);
 
   if(!res.get().ok()) {
