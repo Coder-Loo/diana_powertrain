@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
     if(s == "exit" || s == "q") {
       break;
     }
-    auto res = canOpenManager.writeSdoRemote(motorId, OS_COMMAND_MODE, s);
+    auto res = canOpenManager.writeSdoRemote(motorId, OS_COMMAND_PROMPT, s);
     if(res.get().ok()) {
       ros_info("sent new command");
     } else {
