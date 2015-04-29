@@ -29,7 +29,7 @@ enum {
 
 template <class T> class PowertrainManager {
 public:
-  PowertrainManager(T& card) : manager(card) {}
+  PowertrainManager(T& card) : manager(card, std::chrono::milliseconds(50)) {}
 
   PowertrainManager(const PowertrainManager<T>& oth) = delete;
 
@@ -84,11 +84,13 @@ public:
 
     for(Motor<T>& m: motors) {
       MotorAsyncResult r;
+      std::this_thread::sleep_for(std::chrono::milliseconds(250));
       if(enabled)  {
        r = m.enable().get();
       } else {
        r = m.disable().get();
       }
+      std::this_thread::sleep_for(std::chrono::milliseconds(250));
       if(r.ok) {
         Td::ros_info(Td::toString("Motor ", m.getId(), enabled ? " enabled" : " disabled"));
       } else {
@@ -121,7 +123,11 @@ public:
     evaluate_velocities(linear_v, angular_v, right_v, left_v);
 
     std::vector<std::future<MotorAsyncResult>> results;
+
     results.push_back(motors[0].setSpeed(left_v));
+    
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+
     results.push_back(motors[1].setSpeed(left_v));
 //     motors[RIGHT_FRONT_INDEX].setSpeed(right_v);
 //     motors[RIGHT_REAR_INDEX].setSpeed(right_v);
@@ -129,7 +135,9 @@ public:
 //     motors[LEFT_REAR_INDEX].setSpeed(left_v);
 
     for(std::future<MotorAsyncResult>& r: results) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(250));
       r.get();
+      std::this_thread::sleep_for(std::chrono::milliseconds(250));
     }
 
     return true;
