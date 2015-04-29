@@ -3,14 +3,34 @@
 
 #include <string>
 
+#include "diana_powertrain/consts.hpp"
+
 #include <hlcanopen/can_open_manager.hpp>
 #include <hlcanopen/types.hpp>
 
 #include <team_diana_lib/logging/logging.h>
 #include <team_diana_lib/strings/strings.h>
+#include <team_diana_lib/async/futures.h>
 
 #include "utils.hpp"
 
+#include <functional>
+
+struct MotorAsyncResult {
+  bool ok;
+};
+
+std::future<MotorAsyncResult> ifResultOkThen(std::future<MotorAsyncResult> f, std::function<MotorAsyncResult()> fun) {
+  return Td::then(std::move(f), [fun](MotorAsyncResult r) {
+    if(r.ok == true) {
+      return fun();
+    } else {
+      MotorAsyncResult failedRes;
+      failedRes.ok = false;
+      return failedRes;
+    }
+  });
+}
 
 template <class T> class Motor {
 
@@ -29,19 +49,25 @@ public:
 
   ~Motor() {}
 
-  void enable() {
-    send_msg_sync("MO=1", "enable()");
+  std::future<MotorAsyncResult> enable() {
+    return send_msg_async("MO=1", "enable()");
   }
-  void disable() {
-    send_msg_sync("MO=0", "disable()");
-  }
-
-  void start() {
-    send_msg_sync("BG", "start()");
+  std::future<MotorAsyncResult> disable() {
+    return send_msg_async("MO=0", "disable()");
   }
 
-  void stop() {
-    send_msg_sync("ST", "stop()");
+  std::future<MotorAsyncResult> start() {
+    return send_msg_async("BG", "start()");
+  }
+
+  std::future<MotorAsyncResult> stop() {
+    return send_msg_async("ST", "stop()");
+  }
+
+  std::future<MotorAsyncResult> setCommandMode() {
+    manager.startRemoteNode(nodeId);
+    mssleep(2000);
+    auto res = manager.template writeSdoRemote<uint32_t>(nodeId, OS_COMMAND_MODE, 0);
   }
 
   void send_msg_sync(const std::string& msg, const std::string& desc) {
@@ -52,16 +78,31 @@ public:
     }
   }
 
-  void setSpeed(int speed) {
+  std::future<MotorAsyncResult> send_msg_async(const std::string& msg, const std::string& desc) {
+    Td::ros_info(Td::toString("Sending msg to shell ", nodeId, ": ", msg));
+    auto res =  manager.writeSdoRemote(nodeId, OS_COMMAND_PROMPT_WRITE, msg);
+    return std::async(std::launch::deferred, [&]() {
+      bool ok = res.get().get();
+      MotorAsyncResult asyncRes;
+      asyncRes.ok = ok;
+      if(!ok) {
+        Td::ros_warn(desc + " failed");
+      }
+      return asyncRes;
+    });
+  }
+
+  std::future<MotorAsyncResult> setSpeed(int speed) {
+    std::future<MotorAsyncResult> res;
     if(speed > 0) {
-      start();
+      res = start();
     } else {
-      disable();
+      res = disable();
     }
-    auto response = manager.writeSdoRemote(nodeId, writeIndex, Td::toString("JV=", speed));
-    if(response.get().get() == false) {
-      Td::ros_info("setSpeed() failed");
-    }
+
+    return ifResultOkThen(std::move(res), [&]() {
+      return send_msg_async(Td::toString("JV=", speed), Td::toString("jv=", speed)).get();
+    });
   }
 
   int getSpeed() {
@@ -72,7 +113,7 @@ public:
     }
 
     while(true) {
-      auto response = manager.template readSdoRemote<uint8_t>(nodeId, statusIndex);
+      auto response = manager.template readSdoRemote<uint8_t>(nodeId, OS_COMMAND_PROMPT_STATUS);
       if(response.get().get() == 0x1)
         break;
       else if (response.get().get() == 0x3) {
@@ -86,8 +127,12 @@ public:
       mssleep(500); // 500 ms
     }
 
-    auto result = manager.template readSdoRemote<std::string>(nodeId, readIndex);
+    auto result = manager.template readSdoRemote<std::string>(nodeId, OS_COMMAND_PROMPT_READ);
     return std::stoi(result.get().get());
+  }
+
+  int getId() {
+    return nodeId;
   }
 
 private:
@@ -100,8 +145,5 @@ private:
 
 };
 
-template<class T> hlcanopen::SDOIndex Motor<T>::writeIndex = hlcanopen::SDOIndex(0x1023, 1);
-template<class T> hlcanopen::SDOIndex Motor<T>::statusIndex = hlcanopen::SDOIndex(0x1023, 2);
-template<class T> hlcanopen::SDOIndex Motor<T>::readIndex = hlcanopen::SDOIndex(0x1023, 3);
 
 #endif // MOTOR_HPP

@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
   ros_info("manager thread started");
 
   canOpenManager.startRemoteNode(motorId);
-  mssleep(4000);
+  mssleep(2000);
   auto res = canOpenManager.writeSdoRemote<uint32_t>(motorId, OS_COMMAND_MODE, 0);
 
   if(!res.get().ok()) {
@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
     if(s == "exit" || s == "q") {
       break;
     }
-    auto res = canOpenManager.writeSdoRemote(motorId, OS_COMMAND_PROMPT, s);
+    auto res = canOpenManager.writeSdoRemote(motorId, OS_COMMAND_PROMPT_WRITE, s);
     if(res.get().ok()) {
       ros_info("sent new command");
     } else {
