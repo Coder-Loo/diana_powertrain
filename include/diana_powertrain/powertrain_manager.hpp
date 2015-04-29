@@ -128,7 +128,7 @@ public:
 //     motors[LEFT_FRONT_INDEX].setSpeed(left_v);
 //     motors[LEFT_REAR_INDEX].setSpeed(left_v);
 
-    for(std::future<MotorAsyncResult> r: results) {
+    for(std::future<MotorAsyncResult>& r: results) {
       r.get();
     }
 
