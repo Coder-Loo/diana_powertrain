@@ -20,7 +20,6 @@ DianaPowertrainNode::DianaPowertrainNode(int argc, char** argv) :
   card(0, 0),
   manager(card)
 {
-  ros::init(argc, argv, "powertrain_node");
   ros::NodeHandle n;
 
   // Create publisher
@@ -59,6 +58,7 @@ void DianaPowertrainNode::run() {
 
 
 int main(int argc, char** argv) {
+  ros::init(argc, argv, "powertrain_node");
   DianaPowertrainNode node(argc, argv);
 
   node.run();
