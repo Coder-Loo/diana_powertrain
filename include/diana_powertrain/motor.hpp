@@ -45,6 +45,7 @@ public:
   }
 
   void send_msg_sync(const std::string& msg, const std::string& desc) {
+    Td::ros_info(Td::toString("Sending msg to shell ", nodeId, ": ", msg));
     auto response = manager.writeSdoRemote(nodeId, writeIndex, msg);
     if(response.get().get() == false) {
       Td::ros_info(desc +" failed");

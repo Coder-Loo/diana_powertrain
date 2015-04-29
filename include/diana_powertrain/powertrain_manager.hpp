@@ -30,9 +30,14 @@ enum {
 template <class T> class PowertrainManager {
 public:
   PowertrainManager(T card) : manager(card) {}
-  ~PowertrainManager() {}
+
+  ~PowertrainManager() {
+    manager.stop();
+    canOpenManagerThread.join();
+  }
 
   void initiate_clients() {
+    ros_info("initiating clients");
     std::array<int, 4> client_ids = {RIGHT_REAR_ID, RIGHT_FRONT_ID, LEFT_FRONT_ID, LEFT_REAR_ID};
     std::for_each(client_ids.begin(), client_ids.end(), [&](int clientId) {
       manager.initNode(clientId, hlcanopen::NodeManagerType::CLIENT);
@@ -45,11 +50,10 @@ public:
 //     motors.push_back(Motor<T>(manager, client_ids[2]));
 //     motors.push_back(Motor<T>(manager, client_ids[3]));
 
-    manager.run();
-  }
-
-  void run() {
-
+    ros_info("starting CANopen manager thread");
+    canOpenManagerThread  = std::thread([&](){
+      manager.run();
+    });
   }
 
   void evaluate_velocities(double linear_v, double angular_v, double& right_v,
@@ -60,6 +64,7 @@ public:
   }
 
   bool set_motors_enabled(bool enabled) {
+    Td::ros_info(Td::toString("Set motor enabled: ", enabled));
     std::for_each(motors.begin(), motors.end(), [&](Motor<T>& m) {
       if(enabled) {
         m.enable();
@@ -85,6 +90,7 @@ public:
 private:
   hlcanopen::CanOpenManager<T> manager;
   std::vector<Motor<T>> motors;
+  std::thread canOpenManagerThread;
 };
 
 #endif // POWERTRAIN_MANAGER_HPP
