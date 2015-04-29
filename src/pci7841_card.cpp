@@ -70,7 +70,7 @@ hlcanopen::CanMsg Pci7841Card::read()
         packetDataToStr(canPacket);
     }
   } else {
-    LOG(DEBUG) << "no data received ";
+    //LOG(DEBUG) << "no data received ";
     memset(&canPacket, 0, sizeof(canPacket));
   }
    CanClearRxBuffer(handle);
