@@ -37,7 +37,7 @@ public:
   }
 
   void initiate_clients() {
-    ros_info("initiating clients");
+    Td::ros_info("initiating clients");
     std::array<int, 4> client_ids = {RIGHT_REAR_ID, RIGHT_FRONT_ID, LEFT_FRONT_ID, LEFT_REAR_ID};
     std::for_each(client_ids.begin(), client_ids.end(), [&](int clientId) {
       manager.initNode(clientId, hlcanopen::NodeManagerType::CLIENT);
@@ -50,7 +50,7 @@ public:
 //     motors.push_back(Motor<T>(manager, client_ids[2]));
 //     motors.push_back(Motor<T>(manager, client_ids[3]));
 
-    ros_info("starting CANopen manager thread");
+    Td::ros_info("starting CANopen manager thread");
     canOpenManagerThread  = std::thread([&](){
       manager.run();
     });
