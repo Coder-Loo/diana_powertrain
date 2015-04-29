@@ -49,8 +49,7 @@ public:
 //     }
 //     motors.push_back(Motor<T>(manager, client_ids[0]));
     motors.push_back(Motor<T>(manager, client_ids[2]));
-//     motors.push_back(Motor<T>(manager, client_ids[2]));
-//     motors.push_back(Motor<T>(manager, client_ids[3]));
+    motors.push_back(Motor<T>(manager, client_ids[3]));
 
     Td::ros_info("starting CANopen manager thread");
     canOpenManagerThread = std::thread([&](){
@@ -62,7 +61,7 @@ public:
                            double& left_v) {
     right_v = (linear_v + angular_v * WHEEL_SEPARATION / 2.0);
     left_v = (linear_v - angular_v * WHEEL_SEPARATION / 2.0);
-    Td::ros_info(Td::toString("evaluated velocity: [left wheels: ", left_v, "] right wheels: [", right_v, " ]"));
+    Td::ros_info(Td::toString("evaluated velocity: [left wheels: ", left_v, "] right wheels: [", right_v, "]"));
   }
 
   void reset_motors() {
@@ -91,7 +90,7 @@ public:
        r = m.disable().get();
       }
       if(r.ok) {
-        Td::ros_info(Td::toString("Motor ", m.getId(), " enabled"));
+        Td::ros_info(Td::toString("Motor ", m.getId(), enabled ? " enabled" : " disabled"));
       } else {
         Td::ros_error(Td::toString("Motor ", m.getId(), " NOT enabled"));
       }
@@ -122,7 +121,8 @@ public:
     evaluate_velocities(linear_v, angular_v, right_v, left_v);
 
     std::vector<std::future<MotorAsyncResult>> results;
-    results.push_back(motors[0].setSpeed(right_v));
+    results.push_back(motors[0].setSpeed(left_v));
+    results.push_back(motors[1].setSpeed(left_v));
 //     motors[RIGHT_FRONT_INDEX].setSpeed(right_v);
 //     motors[RIGHT_REAR_INDEX].setSpeed(right_v);
 //     motors[LEFT_FRONT_INDEX].setSpeed(left_v);
