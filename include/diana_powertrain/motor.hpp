@@ -64,10 +64,11 @@ public:
     return send_msg_async("ST", "stop()");
   }
 
-  std::future<MotorAsyncResult> setCommandMode() {
+//   std::future<MotorAsyncResult> setCommandMode() {
+  bool setCommandMode() {
     manager.startRemoteNode(nodeId);
     mssleep(2000);
-    auto res = manager.template writeSdoRemote<uint32_t>(nodeId, OS_COMMAND_MODE, 0);
+    return manager.template writeSdoRemote<uint32_t>(nodeId, OS_COMMAND_MODE, 0).get().get();
   }
 
   void send_msg_sync(const std::string& msg, const std::string& desc) {

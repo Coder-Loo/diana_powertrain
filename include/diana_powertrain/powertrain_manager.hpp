@@ -70,7 +70,12 @@ public:
 
     std::for_each(motors.begin(), motors.end(), [](Motor<T>& m) {
       Td::ros_info(Td::toString("Set command mode for id: ", m.getId()));
-      m.setCommandMode();
+      bool ok = m.setCommandMode();
+      if(ok) {
+        Td::ros_info(Td::toString("Command mode set for motor ", m.getId()));
+      } else {
+        Td::ros_warn(Td::toString("Command mode NOT set for motor ", m.getId()));
+      }
     });
   }
 
