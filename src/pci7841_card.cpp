@@ -57,7 +57,12 @@ hlcanopen::CanMsg Pci7841Card::read()
 
 
   if (CanRcvMsg(handle, &canPacket) == 0) {
+      //LOG(DEBUG) << "receiving data len: " << (unsigned int)canPacket.len ;
     if(getCanId(canPacket.CAN_ID) == 0) {
+      //LOG(DEBUG) << "receiving data: " <<
+        //" -- COB-ID:  " << canPacket.CAN_ID <<
+        //" can-id:  " << getCanId(canPacket.CAN_ID) << " -- data: " <<
+        //packetDataToStr(canPacket);
     } else {
       LOG(DEBUG) << "receiving data: " <<
         " -- COB-ID:  " << canPacket.CAN_ID <<
@@ -68,6 +73,7 @@ hlcanopen::CanMsg Pci7841Card::read()
     LOG(DEBUG) << "no data received ";
     memset(&canPacket, 0, sizeof(canPacket));
   }
+   CanClearRxBuffer(handle);
 
    hlcanopen::CanMsg canMsg;
    canMsg.cobId = hlcanopen::COBId(getCanId(canPacket.CAN_ID), getCOBType(canPacket.CAN_ID));
@@ -92,10 +98,10 @@ std::string Pci7841Card::packetDataToStr(const CAN_PACKET& packet)
   std::stringstream msg;
 
   msg << "<";
-  for(int i =0; i < 7; i++) {
+  for(int i =0; i < packet.len-1; i++) {
     msg << std::hex << std::setw(2) << std::setfill('0')  << (unsigned int) packet.data[i] << ":";
   }
-  msg << std::hex << std::setw(2) << std::setfill('0') << (unsigned int) packet.data[7] << ">";
+  msg << std::hex << std::setw(2) << std::setfill('0') << (unsigned int) packet.data[packet.len-1] << ">";
 
   return msg.str();
 }
