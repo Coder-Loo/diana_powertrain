@@ -81,14 +81,15 @@ public:
   std::future<MotorAsyncResult> send_msg_async(const std::string& msg, const std::string& desc) {
     Td::ros_info(Td::toString("Sending msg to shell ", nodeId, ": ", msg));
     auto res =  manager.writeSdoRemote(nodeId, OS_COMMAND_PROMPT_WRITE, msg);
-    return std::async(std::launch::deferred, [&]() {
-      bool ok = res.get().get();
+    return Td::then(std::move(res), [desc](hlcanopen::SdoResponse<bool> writeResult) {
+      bool ok = writeResult.get();
       MotorAsyncResult asyncRes;
       asyncRes.ok = ok;
       if(!ok) {
         Td::ros_warn(desc + " failed");
       }
       return asyncRes;
+
     });
   }
 
