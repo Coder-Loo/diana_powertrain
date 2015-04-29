@@ -27,7 +27,7 @@ Pci7841Card::Pci7841Card(const Pci7841Card& r) : handle(r.handle)
 
 Pci7841Card::~Pci7841Card()
 {
-  CanCloseDriver(handle);
+//   CanCloseDriver(handle);
 }
 
 bool Pci7841Card::isOk()
