@@ -48,6 +48,7 @@ public:
 //         motors[i] = Motor<T>(manager, client_ids[i]);
 //     }
 //     motors.push_back(Motor<T>(manager, client_ids[0]));
+    motors.push_back(Motor<T>(manager, client_ids[1]));
     motors.push_back(Motor<T>(manager, client_ids[2]));
     motors.push_back(Motor<T>(manager, client_ids[3]));
 
@@ -121,8 +122,10 @@ public:
     evaluate_velocities(linear_v, angular_v, right_v, left_v);
 
     std::vector<std::future<MotorAsyncResult>> results;
-    results.push_back(motors[0].setSpeed(left_v));
+
+    results.push_back(motors[0].setSpeed(right_v));
     results.push_back(motors[1].setSpeed(left_v));
+    results.push_back(motors[2].setSpeed(left_v));
 //     motors[RIGHT_FRONT_INDEX].setSpeed(right_v);
 //     motors[RIGHT_REAR_INDEX].setSpeed(right_v);
 //     motors[LEFT_FRONT_INDEX].setSpeed(left_v);
