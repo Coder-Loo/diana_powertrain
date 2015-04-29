@@ -48,7 +48,7 @@ public:
 //         motors[i] = Motor<T>(manager, client_ids[i]);
 //     }
 //     motors.push_back(Motor<T>(manager, client_ids[0]));
-    motors.push_back(Motor<T>(manager, client_ids[1]));
+    motors.push_back(Motor<T>(manager, client_ids[2]));
 //     motors.push_back(Motor<T>(manager, client_ids[2]));
 //     motors.push_back(Motor<T>(manager, client_ids[3]));
 
