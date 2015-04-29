@@ -51,7 +51,7 @@ public:
 //     motors.push_back(Motor<T>(manager, client_ids[3]));
 
     Td::ros_info("starting CANopen manager thread");
-    canOpenManagerThread  = std::thread([&](){
+    canOpenManagerThread = std::thread([&](){
       manager.run();
     });
   }
@@ -63,14 +63,32 @@ public:
     Td::ros_info(Td::toString("evaluated velocity: [left wheels: ", left_v, "] right wheels: [", right_v, " ]"));
   }
 
-  bool set_motors_enabled(bool enabled) {
+  void reset_motors() {
+    Td::ros_info("Resetting motors");
+
+    std::for_each(motors.begin(), motors.end(), [](Motor<T>& m) {
+      m.setCommandMode();
+    });
+  }
+
+  std::future<bool> set_motors_enabled(bool enabled) {
     Td::ros_info(Td::toString("Set motor enabled: ", enabled));
-    std::for_each(motors.begin(), motors.end(), [&](Motor<T>& m) {
+    std::vector<std::future<MotorAsyncResult>> results;
+
+    std::transform(motors.begin(), motors.end(), results.begin(), [&](Motor<T>& m) {
+      std::future<MotorAsyncResult> r;
       if(enabled) {
-        m.enable();
+        r = m.enable();
       } else {
-        m.disable();
+        r = m.disable();
       }
+      return r;
+    });
+
+    return std::async(std::launch::deferred, [&]() {
+      return std::all_of(results.begin(), results.end(), [&](std::future<MotorAsyncResult>& motorOk) {
+        return motorOk.get().ok == true;
+      });
     });
   }
 

@@ -48,7 +48,10 @@ void DianaPowertrainNode::run() {
   ros_info("starting powertrain manager");
   manager.initiate_clients();
 
-  manager.set_motors_enabled(true);
+  ros_info("resetting motors");
+
+  std::future<bool> ok = manager.set_motors_enabled(true);
+//   ok.get();
 
   ros_info("spin");
   ros::spin();
