@@ -27,6 +27,7 @@ Pci7841Card::Pci7841Card(const Pci7841Card& r) : handle(r.handle)
 
 Pci7841Card::~Pci7841Card()
 {
+  // TODO: close card with another function, not in destructor
 //   CanCloseDriver(handle);
 }
 

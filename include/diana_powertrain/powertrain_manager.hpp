@@ -84,7 +84,12 @@ public:
     std::vector<std::future<MotorAsyncResult>> results;
 
     for(Motor<T>& m: motors) {
-      MotorAsyncResult r = m.enable().get();
+      MotorAsyncResult r;
+      if(enabled)  {
+       r = m.enable().get();
+      } else {
+       r = m.disable().get();
+      }
       if(r.ok) {
         Td::ros_info(Td::toString("Motor ", m.getId(), " enabled"));
       } else {
