@@ -57,7 +57,7 @@ hlcanopen::CanMsg Pci7841Card::read()
 
 
   if (CanRcvMsg(handle, &canPacket) == 0) {
-      LOG(DEBUG) << "receiving data len: " << (unsigned int)canPacket.len ;
+      //LOG(DEBUG) << "receiving data len: " << (unsigned int)canPacket.len ;
     if(getCanId(canPacket.CAN_ID) == 0) {
       //LOG(DEBUG) << "receiving data: " <<
         //" -- COB-ID:  " << canPacket.CAN_ID <<
@@ -70,7 +70,7 @@ hlcanopen::CanMsg Pci7841Card::read()
         packetDataToStr(canPacket);
     }
   } else {
-    LOG(DEBUG) << "no data received ";
+    //LOG(DEBUG) << "no data received ";
     memset(&canPacket, 0, sizeof(canPacket));
   }
    CanClearRxBuffer(handle);
