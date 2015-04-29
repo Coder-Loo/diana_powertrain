@@ -48,6 +48,7 @@ public:
 //         motors[i] = Motor<T>(manager, client_ids[i]);
 //     }
 //     motors.push_back(Motor<T>(manager, client_ids[0]));
+    motors.push_back(Motor<T>(manager, client_ids[1]));
     motors.push_back(Motor<T>(manager, client_ids[2]));
     motors.push_back(Motor<T>(manager, client_ids[3]));
 
@@ -124,11 +125,12 @@ public:
 
     std::vector<std::future<MotorAsyncResult>> results;
 
-    results.push_back(motors[0].setSpeed(left_v));
-    
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
 
+    results.push_back(motors[0].setSpeed(right_v));
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
     results.push_back(motors[1].setSpeed(left_v));
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    results.push_back(motors[2].setSpeed(left_v));
 //     motors[RIGHT_FRONT_INDEX].setSpeed(right_v);
 //     motors[RIGHT_REAR_INDEX].setSpeed(right_v);
 //     motors[LEFT_FRONT_INDEX].setSpeed(left_v);
