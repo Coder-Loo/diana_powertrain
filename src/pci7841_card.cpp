@@ -14,7 +14,7 @@ Pci7841Card::Pci7841Card(int cardNum, int portNum)
     PORT_STRUCT setPort;
     setPort.mode = BIT11;
     setPort.accCode = 0;
-    setPort.accMask = 0x7EE;
+    setPort.accMask = 0x7FF;
     setPort.baudrate = BAUDRATE_500KB;
     CanConfigPort(handle, &setPort);
   }
