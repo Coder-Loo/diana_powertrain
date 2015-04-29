@@ -99,11 +99,11 @@ public:
     if(speed > 0) {
       res = start();
     } else {
-      res = disable();
+      res = stop();
     }
 
     return ifResultOkThen(std::move(res), [&]() {
-      return send_msg_async(Td::toString("JV=", speed), Td::toString("jv=", speed)).get();
+      return send_msg_async(Td::toString("JV=", speed), Td::toString("JV=", speed)).get();
     });
   }
 
