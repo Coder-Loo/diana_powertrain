@@ -121,11 +121,16 @@ public:
     double right_v, left_v; /* XXX: what type should be the velocities? */
     evaluate_velocities(linear_v, angular_v, right_v, left_v);
 
-    motors[0].setSpeed(right_v);
+    std::vector<std::future<MotorAsyncResult>> results;
+    results.push_back(motors[0].setSpeed(right_v));
 //     motors[RIGHT_FRONT_INDEX].setSpeed(right_v);
 //     motors[RIGHT_REAR_INDEX].setSpeed(right_v);
 //     motors[LEFT_FRONT_INDEX].setSpeed(left_v);
 //     motors[LEFT_REAR_INDEX].setSpeed(left_v);
+
+    for(std::future<MotorAsyncResult>& r: results) {
+      r.get();
+    }
 
     return true;
   }
