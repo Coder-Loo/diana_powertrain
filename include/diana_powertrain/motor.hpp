@@ -96,14 +96,14 @@ public:
 
   std::future<MotorAsyncResult> setSpeed(int speed) {
     std::future<MotorAsyncResult> res;
-    if(speed > 0) {
-      res = start();
-    } else {
-      res = stop();
-    }
+    res = send_msg_async(Td::toString("JV=", speed), Td::toString("JV=", speed));
 
-    return ifResultOkThen(std::move(res), [&]() {
-      return send_msg_async(Td::toString("JV=", speed), Td::toString("JV=", speed)).get();
+    return ifResultOkThen(std::move(res), [&, speed]() {
+      if(speed > 0) {
+        return start().get();
+      } else {
+        return stop().get();
+      }
     });
   }
 
