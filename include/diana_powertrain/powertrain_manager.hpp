@@ -29,7 +29,7 @@ enum {
 
 template <class T> class PowertrainManager {
 public:
-  PowertrainManager(T card) : manager(card) {}
+  PowertrainManager(T& card) : manager(card) {}
 
   PowertrainManager(const PowertrainManager<T>& oth) = delete;
 

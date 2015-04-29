@@ -25,6 +25,7 @@ public:
 
   Pci7841Card(int cardNum, int portNum);
   Pci7841Card(const Pci7841Card& r);
+
   ~Pci7841Card();
 
   bool isOk();
