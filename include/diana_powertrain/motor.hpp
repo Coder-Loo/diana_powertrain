@@ -22,6 +22,7 @@ struct MotorAsyncResult {
 
 std::future<MotorAsyncResult> ifResultOkThen(std::future<MotorAsyncResult> f, std::function<MotorAsyncResult()> fun) {
   return Td::then(std::move(f), [fun](MotorAsyncResult r) {
+    Td::ros_info(Td::toString(" last result is ", r.ok));
     if(r.ok == true) {
       return fun();
     } else {
