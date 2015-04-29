@@ -41,6 +41,7 @@ bool DianaPowertrainNode::setEnableMotorsCallback(diana_powertrain::EnableMotors
                                                   diana_powertrain::EnableMotors::Response& res) {
   manager.set_motors_enabled(req.enable);
   res.ok = true;
+  return true;
 }
 
 
@@ -48,7 +49,7 @@ void DianaPowertrainNode::run() {
   ros_info("starting powertrain manager");
   manager.initiate_clients();
 
-  ros_info("resetting motors");
+  manager.reset_motors();
 
   std::future<bool> ok = manager.set_motors_enabled(true);
 //   ok.get();
