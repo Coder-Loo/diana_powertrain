@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <chrono>
 
 #include "diana_powertrain/powertrain_manager.hpp"
 #include "diana_powertrain/pci7841_card.hpp"
@@ -51,7 +52,7 @@ bool parseCommandLine(int argc, char** argv, int& motorId) {
 
 int main(int argc, char** argv) {
   Pci7841Card card(0, 0);
-  hlcanopen::CanOpenManager<Pci7841Card> canOpenManager(card);
+  hlcanopen::CanOpenManager<Pci7841Card> canOpenManager(card, std::chrono::milliseconds(150));
 
   int motorId = 0;
   if(!parseCommandLine(argc, argv, motorId)) {
@@ -67,7 +68,7 @@ int main(int argc, char** argv) {
   ros_info("manager thread started");
 
   canOpenManager.startRemoteNode(motorId);
-  mssleep(1500);
+  mssleep(4000);
   auto res = canOpenManager.writeSdoRemote<uint32_t>(motorId, OS_COMMAND_MODE, 0);
 
   if(!res.get().ok()) {
