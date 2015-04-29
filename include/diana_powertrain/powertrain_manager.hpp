@@ -31,6 +31,8 @@ template <class T> class PowertrainManager {
 public:
   PowertrainManager(T card) : manager(card) {}
 
+  PowertrainManager(const PowertrainManager<T>& oth) = delete;
+
   ~PowertrainManager() {
     manager.stop();
     canOpenManagerThread.join();
@@ -67,6 +69,7 @@ public:
     Td::ros_info("Resetting motors");
 
     std::for_each(motors.begin(), motors.end(), [](Motor<T>& m) {
+      Td::ros_info(Td::toString("Set command mode for id: ", m.getId()));
       m.setCommandMode();
     });
   }
@@ -75,21 +78,32 @@ public:
     Td::ros_info(Td::toString("Set motor enabled: ", enabled));
     std::vector<std::future<MotorAsyncResult>> results;
 
-    std::transform(motors.begin(), motors.end(), results.begin(), [&](Motor<T>& m) {
-      std::future<MotorAsyncResult> r;
-      if(enabled) {
-        r = m.enable();
+    for(Motor<T>& m: motors) {
+      MotorAsyncResult r = m.enable().get();
+      if(r.ok) {
+        Td::ros_info(Td::toString("Motor ", m.getId(), " enabled"));
       } else {
-        r = m.disable();
+        Td::ros_error(Td::toString("Motor ", m.getId(), " NOT enabled"));
       }
-      return r;
-    });
+    }
 
-    return std::async(std::launch::deferred, [&]() {
-      return std::all_of(results.begin(), results.end(), [&](std::future<MotorAsyncResult>& motorOk) {
-        return motorOk.get().ok == true;
-      });
-    });
+//     std::transform(motors.begin(), motors.end(), results.begin(), [&](Motor<T>& m) {
+//       std::future<MotorAsyncResult> r;
+//       if(enabled) {
+//         r = m.enable();
+//       } else {
+//         r = m.disable();
+//       }
+//       return r;
+//     });
+//
+//     Td::ros_info(Td::toString("check results async: "));
+//     return std::async(std::launch::deferred, [&]() {
+//       return std::all_of(results.begin(), results.end(), [&](std::future<MotorAsyncResult>& motorOk) {
+//         Td::ros_info(Td::toString("checking a motor: "));
+//         return motorOk.get().ok == true;
+//       });
+//     });
   }
 
   bool set_velocity(double linear_v, double angular_v) {
