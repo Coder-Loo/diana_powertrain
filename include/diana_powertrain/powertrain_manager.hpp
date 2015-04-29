@@ -104,6 +104,7 @@ public:
 //         return motorOk.get().ok == true;
 //       });
 //     });
+    return std::async(std::launch::deferred, [](){ return true; });
   }
 
   bool set_velocity(double linear_v, double angular_v) {
