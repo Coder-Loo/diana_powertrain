@@ -67,7 +67,7 @@ public:
 //   std::future<MotorAsyncResult> setCommandMode() {
   bool setCommandMode() {
     manager.startRemoteNode(nodeId);
-    mssleep(3000);
+    mssleep(4000);
     return manager.template writeSdoRemote<uint32_t>(nodeId, OS_COMMAND_MODE, 0).get().get();
   }
 
