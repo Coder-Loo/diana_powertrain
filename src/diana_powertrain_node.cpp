@@ -47,8 +47,16 @@ void DianaPowertrainNode::setMsgAndServicesEnabled(bool enabled)
 
 
 void DianaPowertrainNode::setVelocityCallback(const geometry_msgs::Twist& msg) {
-  ros_info(toString("Setting velocity: ", msg.linear.x, " - ", msg.angular.z));
-  manager.set_velocity(msg.linear.x, msg.angular.z);
+  std::future<bool> f = std::async(std::launch::async, [&, msg]() {
+    ros_info(toString("Setting velocity: ", msg.linear.x, " - ", msg.angular.z));
+    manager.set_velocity(msg.linear.x, msg.angular.z);
+    return true;
+  });
+  if(f.wait_for(std::chrono::milliseconds(1000)) != std::future_status::ready) {
+    ros_warn("Something went wrong while setting velocity");
+  } else {
+    f.get();
+  }
 }
 
 bool DianaPowertrainNode::setEnableMotorsCallback(diana_powertrain::EnableMotors::Request& req,
