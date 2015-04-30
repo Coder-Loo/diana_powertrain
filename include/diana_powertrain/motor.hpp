@@ -142,10 +142,10 @@ private:
     res = send_msg_async(Td::toString("JV=", velocity), Td::toString("JV=", velocity));
 
     return ifResultOkThen(std::move(res), [&, velocity]() {
-      if(velocity > 0) {
-        return start().get();
-      } else {
+      if(velocity == 0) {
         return stop().get();
+      } else {
+        return start().get();
       }
     });
   }
