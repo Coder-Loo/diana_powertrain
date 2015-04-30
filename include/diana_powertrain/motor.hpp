@@ -16,8 +16,13 @@
 
 #include <functional>
 
+
 struct MotorAsyncResult {
   bool ok;
+};
+
+template <typename T> struct  MotorAsyncValue : public MotorAsyncResult {
+  T value;
 };
 
 std::future<MotorAsyncResult> ifResultOkThen(std::future<MotorAsyncResult> f, std::function<MotorAsyncResult()> fun) {
@@ -95,12 +100,49 @@ public:
     });
   }
 
-  std::future<MotorAsyncResult> setSpeed(int speed) {
-    std::future<MotorAsyncResult> res;
-    res = send_msg_async(Td::toString("JV=", speed), Td::toString("JV=", speed));
+  std::future<MotorAsyncResult> setVelocity(float MetersPerSecond) {
+    return setJVVelocity(MetersPerSecond*MPS_JV_FACTOR);
+  }
 
-    return ifResultOkThen(std::move(res), [&, speed]() {
-      if(speed > 0) {
+  // TODO: use future for return value
+//   std::future<MotorAsyncValue<float>> getVelocity() {
+  // Velocity in Meters per second.
+  float getVelocity() {
+    return 0;
+  }
+
+  int getId() {
+    return nodeId;
+  }
+
+private:
+
+  int clampJVToSafe(int speed) {
+    bool clamped = false;
+
+    if(speed > SPEED_JV_LIMIT) {
+      return SPEED_JV_LIMIT;
+      clamped = true;
+    } else if(speed < -SPEED_JV_LIMIT) {
+      return -SPEED_JV_LIMIT;
+      clamped = true;
+    }
+
+    if(clamped) {
+      Td::ros_warn(Td::toString("The requested speed was clamped to: ", speed ,"JV in order to maintain safety margins"));
+    }
+
+    return speed;
+  }
+
+  std::future<MotorAsyncResult> setJVVelocity(int velocity) {
+    velocity = clampJVToSafe(velocity);
+
+    std::future<MotorAsyncResult> res;
+    res = send_msg_async(Td::toString("JV=", velocity), Td::toString("JV=", velocity));
+
+    return ifResultOkThen(std::move(res), [&, velocity]() {
+      if(velocity > 0) {
         return start().get();
       } else {
         return stop().get();
@@ -108,7 +150,7 @@ public:
     });
   }
 
-  int getSpeed() {
+  int getJVVelocity() {
     auto response = manager.writeSdoRemote(nodeId, writeIndex, "JV");
     if(response.get().get() == false) {
       Td::ros_error("getSpeed() failed: unable to fetch value");
@@ -134,9 +176,6 @@ public:
     return std::stoi(result.get().get());
   }
 
-  int getId() {
-    return nodeId;
-  }
 
 private:
   hlcanopen::CanOpenManager<T>& manager;

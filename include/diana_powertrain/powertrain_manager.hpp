@@ -34,6 +34,7 @@ public:
   PowertrainManager(const PowertrainManager<T>& oth) = delete;
 
   ~PowertrainManager() {
+    set_motors_enabled(false);
     manager.stop();
     canOpenManagerThread.join();
   }
@@ -58,8 +59,8 @@ public:
     });
   }
 
-  void evaluate_velocities(double linear_v, double angular_v, double& right_v,
-                           double& left_v) {
+  void evaluate_velocities(double linear_v, double angular_v, float& right_v,
+                           float& left_v) {
     right_v = (linear_v + angular_v * WHEEL_SEPARATION / 2.0);
     left_v = (linear_v - angular_v * WHEEL_SEPARATION / 2.0);
     Td::ros_info(Td::toString("evaluated velocity: [left wheels: ", left_v, "] right wheels: [", right_v, "]"));
@@ -120,21 +121,21 @@ public:
   }
 
   bool set_velocity(double linear_v, double angular_v) {
-    double right_v, left_v; /* XXX: what type should be the velocities? */
+    float right_v, left_v;
     evaluate_velocities(linear_v, angular_v, right_v, left_v);
 
     std::vector<std::future<MotorAsyncResult>> results;
 
 
-    results.push_back(motors[0].setSpeed(right_v));
+    results.push_back(motors[0].setVelocity(right_v));
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
-    results.push_back(motors[1].setSpeed(left_v));
+    results.push_back(motors[1].setVelocity(left_v));
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
-    results.push_back(motors[2].setSpeed(left_v));
-//     motors[RIGHT_FRONT_INDEX].setSpeed(right_v);
-//     motors[RIGHT_REAR_INDEX].setSpeed(right_v);
-//     motors[LEFT_FRONT_INDEX].setSpeed(left_v);
-//     motors[LEFT_REAR_INDEX].setSpeed(left_v);
+    results.push_back(motors[2].setVelocity(left_v));
+//     motors[RIGHT_FRONT_INDEX].setVelocity(right_v);
+//     motors[RIGHT_REAR_INDEX].setVelocity(right_v);
+//     motors[LEFT_FRONT_INDEX].setVelocity(left_v);
+//     motors[LEFT_REAR_INDEX].setVelocity(left_v);
 
     for(std::future<MotorAsyncResult>& r: results) {
       std::this_thread::sleep_for(std::chrono::milliseconds(250));
