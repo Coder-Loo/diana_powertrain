@@ -17,9 +17,12 @@ public:
 
   void run();
 
+  void setMsgAndServicesEnabled(bool enabled);
+
 private:
   void setVelocityCallback(const geometry_msgs::Twist& msg);
   bool setEnableMotorsCallback(diana_powertrain::EnableMotors::Request& req, diana_powertrain::EnableMotors::Response& res);
+
 
 private:
    ros::NodeHandle n;

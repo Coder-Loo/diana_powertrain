@@ -24,13 +24,27 @@ DianaPowertrainNode::DianaPowertrainNode(int argc, char** argv) :
 
   // Create publisher
   velocityPublisher = n.advertise<geometry_msgs::Twist>("velocity", 1000);
-  velocitySubscriber = n.subscribe("set_velocity", 1000, &DianaPowertrainNode::setVelocityCallback, this);
-  enableMotorsService = n.advertiseService("enable_motors", &DianaPowertrainNode::setEnableMotorsCallback, this);
 }
 
 DianaPowertrainNode::~DianaPowertrainNode() {
 
 }
+
+void DianaPowertrainNode::setMsgAndServicesEnabled(bool enabled)
+{
+  velocitySubscriber.shutdown();
+  enableMotorsService.shutdown();
+
+  if(enabled) {
+    // TODO: queue size = 1 only for testing, use 1000 after testing.
+    velocitySubscriber = n.subscribe("set_velocity", 1, &DianaPowertrainNode::setVelocityCallback, this);
+    enableMotorsService = n.advertiseService("enable_motors", &DianaPowertrainNode::setEnableMotorsCallback, this);
+  } else {
+    velocitySubscriber.shutdown();
+    enableMotorsService.shutdown();
+  }
+}
+
 
 void DianaPowertrainNode::setVelocityCallback(const geometry_msgs::Twist& msg) {
   ros_info(toString("Setting velocity: ", msg.linear.x, " - ", msg.angular.z));
@@ -54,8 +68,12 @@ void DianaPowertrainNode::run() {
   std::future<bool> ok = manager.set_motors_enabled(true);
 //   ok.get();
 
+  setEnableMotorsCallback(true);
+
   ros_info("spin");
   ros::spin();
+
+  setEnableMotorsCallback(false);
 }
 
 
