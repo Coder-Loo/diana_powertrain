@@ -68,12 +68,12 @@ void DianaPowertrainNode::run() {
   std::future<bool> ok = manager.set_motors_enabled(true);
 //   ok.get();
 
-  setEnableMotorsCallback(true);
+  setMsgAndServicesEnabled(true);
 
   ros_info("spin");
   ros::spin();
 
-  setEnableMotorsCallback(false);
+  setMsgAndServicesEnabled(false);
 }
 
 
