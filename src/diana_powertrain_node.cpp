@@ -53,7 +53,7 @@ void DianaPowertrainNode::setVelocityCallback(const geometry_msgs::Twist& msg) {
     manager.set_velocity(msg.linear.x, msg.angular.z);
     return true;
   });
-  if(f.wait_for(std::chrono::milliseconds(1000)) != std::future_status::ready) {
+  if(f.wait_for(std::chrono::milliseconds(3000)) != std::future_status::ready) {
     ros_warn("Something went wrong while setting velocity");
   } else {
     ros_info("getting set velocity future value");

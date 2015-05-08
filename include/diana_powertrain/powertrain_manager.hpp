@@ -49,6 +49,7 @@ public:
 //         motors[i] = Motor<T>(manager, client_ids[i]);
 //     }
 //     motors.push_back(Motor<T>(manager, client_ids[0]));
+    motors.push_back(Motor<T>(manager, client_ids[0]));
     motors.push_back(Motor<T>(manager, client_ids[1]));
     motors.push_back(Motor<T>(manager, client_ids[2]));
     motors.push_back(Motor<T>(manager, client_ids[3]));
@@ -129,9 +130,12 @@ public:
 
     results.push_back(motors[0].setVelocity(right_v));
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
-    results.push_back(motors[1].setVelocity(left_v));
+    results.push_back(motors[1].setVelocity(right_v));
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
     results.push_back(motors[2].setVelocity(left_v));
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    results.push_back(motors[3].setVelocity(left_v));
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
 //     motors[RIGHT_FRONT_INDEX].setVelocity(right_v);
 //     motors[RIGHT_REAR_INDEX].setVelocity(right_v);
 //     motors[LEFT_FRONT_INDEX].setVelocity(left_v);
