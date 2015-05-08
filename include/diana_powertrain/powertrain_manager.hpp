@@ -6,6 +6,8 @@
 #include <team_diana_lib/logging/logging.h>
 #include <team_diana_lib/strings/strings.h>
 
+#include <cmath>
+
 #include <hlcanopen/can_open_manager.hpp>
 
 #include <vector>
@@ -122,7 +124,20 @@ public:
 
   bool set_velocity(double linear_v, double angular_v) {
     float right_v, left_v;
+
     evaluate_velocities(linear_v, angular_v, right_v, left_v);
+
+    const auto MIN_V = -1.f;
+    const auto MAX_V = 1.f;
+
+    if(right_v > MAX_V || right_v < MIN_V) {
+      Td::ros_warn(Td::toString("velocity ", right_v, " is not supported by right wheels. clamping"));
+      right_v = clamp(right_v, MIN_V, MAX_V );
+    }
+    if(left_v > MAX_V || left_v < MIN_V) {
+      Td::ros_warn(Td::toString("velocity ", left_v, " is not supported by left wheels. clamping"));
+      left_v = clamp(left_v, MIN_V, MAX_V );
+    }
 
     std::vector<std::future<MotorAsyncResult>> results;
 
