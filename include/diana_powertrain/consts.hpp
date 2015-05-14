@@ -51,7 +51,7 @@ std::uint16_t getControlWordCommandBits(ControlWordCommand command);
 
 bool getControlWordCommandFromString(const std::string s, ControlWordCommand& command);
 
-enum ModeOfOperation {
+enum ModeOfOperation : int8_t {
   NO_MODE = -1,
   PROFILE_POSITION = 1,
   PROFILED_VELOCITY = 3,

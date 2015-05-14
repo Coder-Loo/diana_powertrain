@@ -7,7 +7,14 @@
 MotorPublisher::MotorPublisher(uint32_t id, ros::NodeHandle& nh) :
 id(id)
 {
-  velocityPublisher = nh.advertise<std_msgs::Float32>(Td::toString("wheel_", id, "/speed"), 100);
+  velocityPublisher = nh.advertise<std_msgs::Float32>(Td::toString("wheel_", id, "_speed"), 100);
+}
+
+MotorPublisher::MotorPublisher(const MotorPublisher& oth) :
+id(oth.id),
+velocityPublisher(oth.velocityPublisher)
+{
+
 }
 
 MotorPublisher::~MotorPublisher()
