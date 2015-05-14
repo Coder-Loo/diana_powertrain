@@ -19,7 +19,6 @@ velocityPublisher(oth.velocityPublisher)
 
 MotorPublisher::~MotorPublisher()
 {
-  velocityPublisher.shutdown();
 }
 
 uint32_t MotorPublisher::getId() const
