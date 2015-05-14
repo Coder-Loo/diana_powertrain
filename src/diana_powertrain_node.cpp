@@ -122,7 +122,7 @@ void DianaPowertrainNode::run() {
 
 
   std::vector<int> motorIds;
-  if(n.hasParam("motor_ids")) {
+  if(!n.hasParam("motor_ids")) {
     motorIds.push_back(11);
     motorIds.push_back(12);
     motorIds.push_back(13);
@@ -137,14 +137,14 @@ void DianaPowertrainNode::run() {
     motorPublishers.push_back(MotorPublisher(motorId, n));
   }
 
-  publishUpdateThread = std::unique_ptr<std::thread>(new std::thread(
-    [&] () {
-      while(ros::ok()) {
-        publishUpdate();
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
-      }
-    }
-  ));
+ // publishUpdateThread = std::unique_ptr<std::thread>(new std::thread(
+ //   [&] () {
+ //     while(ros::ok()) {
+ //       publishUpdate();
+ //       std::this_thread::sleep_for(std::chrono::milliseconds(500));
+ //     }
+ //   }
+ // ));
 
   manager.initiate_clients(motorIds);
 
