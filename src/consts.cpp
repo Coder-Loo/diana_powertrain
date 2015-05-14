@@ -1,4 +1,5 @@
 #include "diana_powertrain/consts.hpp"
+#include <team_diana_lib/strings/bit_printer.h>
 
 std::ostream& operator<< (std::ostream & os, ElmoStatus val)
 {
@@ -46,6 +47,8 @@ bool getControlWordCommandFromString(const std::string s, ControlWordCommand& va
 
 std::ostream& operator<< (std::ostream & os, ModeOfOperation val)
 {
+    Td::BitPrinter<4> bitPrinter;
+    os << bitPrinter.toString((int)val) << " ";
     switch (val)
     {
         case NO_MODE                : return os << "NO_MODE";

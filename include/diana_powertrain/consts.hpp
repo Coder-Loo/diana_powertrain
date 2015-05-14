@@ -65,5 +65,4 @@ bool getModeOfOperationFromString(const std::string s, ModeOfOperation& mode);
 std::ostream& operator<< (std::ostream & os, ModeOfOperation val);
 
 
-
 #endif
