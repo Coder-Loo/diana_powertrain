@@ -44,7 +44,10 @@ void DianaPowertrainNode::setMsgAndServicesEnabled(bool enabled)
     // TODO: queue size = 1 only for testing, use 1000 after testing.
     velocitySubscriber = n.subscribe("set_velocity", 1, &DianaPowertrainNode::setVelocityCallback, this);
     enableMotorsService = n.advertiseService("enable_motors", &DianaPowertrainNode::setEnableMotorsCallback, this);
+    setStatusWordService = n.advertiseService("set_control_word", &DianaPowertrainNode::setControlWordCallback, this);
     getStatusWordService = n.advertiseService("get_status_word", &DianaPowertrainNode::getStatusWordCallback, this);
+    setOperationModeService = n.advertiseService("set_operation_mode", &DianaPowertrainNode::setOperationModeCallback, this);
+    getOperationModeService = n.advertiseService("get_operation_mode", &DianaPowertrainNode::getOperationModeCallback, this);
   }
 }
 
@@ -122,7 +125,7 @@ void DianaPowertrainNode::run() {
 
 
   std::vector<int> motorIds;
-  if(n.hasParam("motor_ids")) {
+  if(!n.hasParam("motor_ids")) {
     motorIds.push_back(11);
     motorIds.push_back(12);
     motorIds.push_back(13);
