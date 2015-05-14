@@ -56,6 +56,24 @@ public:
     for(int motorId : motorIds) {
       manager.initNode(motorId, hlcanopen::NodeManagerType::CLIENT);
       motors.push_back(Motor<T>(manager, motorId));
+
+      manager.writeSdoLocal(motorId, hlcanopen::SDOIndex(0x1234, 0x00), 5000);
+
+      hlcanopen::PdoConfiguration configTargetVel(hlcanopen::RPDO, 1);
+
+      hlcanopen::COBIdPdoEntry cobIdPdo;
+      cobIdPdo.setCobId(hlcanopen::COBId(motorId, 0x200));
+      cobIdPdo.enable29bitId(false);
+      cobIdPdo.enableRtr(false);
+      cobIdPdo.enablePdo(true);
+
+      configTargetVel.setCobId(cobIdPdo);
+      configTargetVel.setTransmissionType(hlcanopen::ASYNCHRONOUS);
+      configTargetVel.setNumberOfEntries();
+
+      configTargetVel.addMapping(hlcanopen::SDOIndex(0x1234, 0), hlcanopen::SDOIndex(0x60FF, 0x00), 0x20); /* XXX */
+
+      manager.writePdoConfiguration(motorId, configTargetVel);
     }
 
     Td::ros_info("starting CANopen manager thread");
