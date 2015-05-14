@@ -41,22 +41,13 @@ public:
     canOpenManagerThread.join();
   }
 
-  void initiate_clients() {
+  void initiate_clients(const std::vector<int>& motorIds) {
     Td::ros_info("initiating clients");
-    std::array<int, 4> client_ids = {RIGHT_REAR_ID, RIGHT_FRONT_ID, LEFT_FRONT_ID, LEFT_REAR_ID};
-    std::for_each(client_ids.begin(), client_ids.end(), [&](int clientId) {
-      manager.initNode(clientId, hlcanopen::NodeManagerType::CLIENT);
-    });
 
-//     for(auto i = 0; i < 4; i++) {
-//         motors[i] = Motor<T>(manager, client_ids[i]);
-//     }
-//     motors.push_back(Motor<T>(manager, client_ids[0]));
-//
-    motors.push_back(Motor<T>(manager, client_ids[0]));
-    motors.push_back(Motor<T>(manager, client_ids[1]));
-    motors.push_back(Motor<T>(manager, client_ids[2]));
-    motors.push_back(Motor<T>(manager, client_ids[3]));
+    for(int motorId : motorIds) {
+      manager.initNode(motorId, hlcanopen::NodeManagerType::CLIENT);
+      motors.push_back(Motor<T>(manager, motorId));
+    }
 
     Td::ros_info("starting CANopen manager thread");
     canOpenManagerThread = std::thread([&](){
@@ -85,6 +76,37 @@ public:
     });
   }
 
+  void printMotorsStatusWord() {
+    for(Motor<T>& m: motors) {
+      int motorId = m.getId();
+      StatusWord statusWord = m.getStatusWord().get().value;
+      std::cout << "StatusWord of motor " << motorId << ": \n" << statusWord.toStringFull() << " \n";
+    }
+  }
+
+  void setControlWord(ControlWordCommand command) {
+    for(Motor<T>& m: motors) {
+      int motorId = m.getId();
+      Td::ros_info(Td::toString("Setting control word of motor: " + motorId));
+      m.setControlWord(command);
+    }
+  }
+
+
+  void printMotorsOperationMode() {
+    for(Motor<T>& m: motors) {
+      int motorId = m.getId();
+      ModeOfOperation mode = m.getOperationMode().get().value;
+      std::cout << "Operation mode of motor " << motorId << ": \n" << mode << " \n";
+    }
+  }
+
+  void setMotorsOperationMode(ModeOfOperation mode) {
+    std::for_each(motors.begin(), motors.end(), [mode](Motor<T>& m) {
+      m.setOperationMode(mode);
+    });
+  }
+
   std::future<bool> set_motors_enabled(bool enabled) {
     Td::ros_info(Td::toString("Set motor enabled: ", enabled));
     std::vector<std::future<MotorAsyncResult>> results;
@@ -104,25 +126,6 @@ public:
         Td::ros_error(Td::toString("Motor ", m.getId(), " NOT enabled"));
       }
     }
-
-//     std::transform(motors.begin(), motors.end(), results.begin(), [&](Motor<T>& m) {
-//       std::future<MotorAsyncResult> r;
-//       if(enabled) {
-//         r = m.enable();
-//       } else {
-//         r = m.disable();
-//       }
-//       return r;
-//     });
-//
-//     Td::ros_info(Td::toString("check results async: "));
-//     return std::async(std::launch::deferred, [&]() {
-//       return std::all_of(results.begin(), results.end(), [&](std::future<MotorAsyncResult>& motorOk) {
-//         Td::ros_info(Td::toString("checking a motor: "));
-//         return motorOk.get().ok == true;
-//       });
-//     });
-
     return std::async(std::launch::deferred, [](){ return true; });
   }
 
@@ -146,20 +149,14 @@ public:
     std::vector<std::future<MotorAsyncResult>> results;
 
 
-    const unsigned int  pause = 250;
-    results.push_back(motors[0].setVelocity(right_v));
-    std::this_thread::sleep_for(std::chrono::milliseconds(pause));
-    results.push_back(motors[1].setVelocity(right_v));
-    std::this_thread::sleep_for(std::chrono::milliseconds(pause));
-    results.push_back(motors[2].setVelocity(left_v));
-    std::this_thread::sleep_for(std::chrono::milliseconds(pause));
-    results.push_back(motors[3].setVelocity(left_v));
-    std::this_thread::sleep_for(std::chrono::milliseconds(pause));
-
-//     motors[RIGHT_FRONT_INDEX].setVelocity(right_v);
-//     motors[RIGHT_REAR_INDEX].setVelocity(right_v);
-//     motors[LEFT_FRONT_INDEX].setVelocity(left_v);
-//     motors[LEFT_REAR_INDEX].setVelocity(left_v);
+    for(Motor<T> motor : motors) {
+      if(motor.getId() == 11 || motor.getId() == 14) {
+        motor.setVelocity(right_v);
+      } else {
+        motor.setVelocity(left_v);
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    }
 
     for(std::future<MotorAsyncResult>& r: results) {
       const unsigned int  pause = 250;
@@ -172,6 +169,10 @@ public:
     }
 
     return true;
+  }
+
+  std::vector<Motor<T>>& getMotors() {
+    return motors;
   }
 
 private:
