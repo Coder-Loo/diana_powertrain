@@ -40,6 +40,7 @@ bool getControlWordCommandFromString(const std::string s, ControlWordCommand& va
   else if (s == "DISABLE_VOLTAGE") val = ControlWordCommand::DISABLE_VOLTAGE;
   else if (s == "QUICK_STOP") val = ControlWordCommand::QUICK_STOP;
   else if (s == "DISABLE_OPERATION") val = ControlWordCommand::DISABLE_OPERATION;
+  else if (s == "ENABLE_OPERATION") val = ControlWordCommand::ENABLE_OPERATION;
   else if (s == "FAULT_RESET") val = ControlWordCommand::FAULT_RESET;
   else return false;
   return true;
