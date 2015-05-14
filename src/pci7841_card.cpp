@@ -61,7 +61,8 @@ hlcanopen::CanMsg Pci7841Card::read()
 
   if (CanRcvMsg(handle, &canPacket) == 0) {
       //LOG(DEBUG) << "receiving data len: " << (unsigned int)canPacket.len ;
-    if(getCanId(canPacket.CAN_ID) == 0 || getCanId(canPacket.CAN_ID) == 0x60) {
+    auto canId = getCanId(canPacket.CAN_ID);
+    if(getCanId(canPacket.CAN_ID) == 0 || getCanId(canPacket.CAN_ID) == 0x60 || canId == 0x40) {
       //LOG(DEBUG) << "receiving data: " <<
         //" -- COB-ID:  " << canPacket.CAN_ID <<
         //" can-id:  " << getCanId(canPacket.CAN_ID) << " -- data: " <<
