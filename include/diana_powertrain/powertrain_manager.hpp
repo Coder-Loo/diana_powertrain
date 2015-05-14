@@ -41,21 +41,22 @@ public:
     canOpenManagerThread.join();
   }
 
-  void initiate_clients() {
+  void initiate_clients(const std::vector<int>& motorIds) {
     Td::ros_info("initiating clients");
-    std::array<int, 4> client_ids = {RIGHT_REAR_ID, RIGHT_FRONT_ID, LEFT_FRONT_ID, LEFT_REAR_ID};
-    std::for_each(client_ids.begin(), client_ids.end(), [&](int clientId) {
-      manager.initNode(clientId, hlcanopen::NodeManagerType::CLIENT);
-    });
+//     std::array<int, 4> client_ids = {RIGHT_REAR_ID, RIGHT_FRONT_ID, LEFT_FRONT_ID, LEFT_REAR_ID};
+//
+//     std::for_each(client_ids.begin(), client_ids.end(), [&](int clientId) {
+//       manager.initNode(clientId, hlcanopen::NodeManagerType::CLIENT);
+//     });
 
 //     for(auto i = 0; i < 4; i++) {
 //         motors[i] = Motor<T>(manager, client_ids[i]);
 //     }
 
-    motors.push_back(Motor<T>(manager, client_ids[0]));
-    motors.push_back(Motor<T>(manager, client_ids[1]));
-    motors.push_back(Motor<T>(manager, client_ids[2]));
-    motors.push_back(Motor<T>(manager, client_ids[3]));
+    for(int motorId : motorIds) {
+      manager.initNode(motorId, hlcanopen::NodeManagerType::CLIENT);
+      motors.push_back(Motor<T>(manager, motorId));
+    }
 
     Td::ros_info("starting CANopen manager thread");
     canOpenManagerThread = std::thread([&](){
@@ -157,17 +158,14 @@ public:
     std::vector<std::future<MotorAsyncResult>> results;
 
 
-    results.push_back(motors[0].setVelocity(right_v));
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
-    results.push_back(motors[1].setVelocity(left_v));
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
-    results.push_back(motors[2].setVelocity(left_v));
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
-    results.push_back(motors[3].setVelocity(left_v));
-//     motors[RIGHT_FRONT_INDEX].setVelocity(right_v);
-//     motors[RIGHT_REAR_INDEX].setVelocity(right_v);
-//     motors[LEFT_FRONT_INDEX].setVelocity(left_v);
-//     motors[LEFT_REAR_INDEX].setVelocity(left_v);
+    for(Motor<T> motor : motors) {
+      if(motor.getId() == 11 || motor.getId() == 14) {
+        motor.setVelocity(right_v);
+      } else {
+        motor.setVelocity(left_v);
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    }
 
     for(std::future<MotorAsyncResult>& r: results) {
       std::this_thread::sleep_for(std::chrono::milliseconds(250));
@@ -179,6 +177,10 @@ public:
     }
 
     return true;
+  }
+
+  std::vector<Motor<T>>& getMotors() {
+    return motors;
   }
 
 private:

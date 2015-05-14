@@ -135,6 +135,7 @@ target_link_libraries(pci7841_card
 
 add_executable(diana_powertrain_node
   src/diana_powertrain_node.cpp
+  src/motor_publisher.cpp
 )
 
 target_link_libraries(diana_powertrain_node

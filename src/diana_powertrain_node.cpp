@@ -5,11 +5,14 @@
 
 #include <team_diana_lib/logging/logging.h>
 #include <team_diana_lib/strings/strings.h>
+#include <team_diana_lib/strings/iterables.h>
 
 #include "diana_powertrain/diana_powertrain_node.hpp"
 
 #include "diana_powertrain/powertrain_manager.hpp"
 #include "diana_powertrain/pci7841_card.hpp"
+
+#include <cassert>
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -20,14 +23,15 @@ DianaPowertrainNode::DianaPowertrainNode(int argc, char** argv) :
   card(0, 0),
   manager(card)
 {
-  ros::NodeHandle n;
 
   // Create publisher
   velocityPublisher = n.advertise<geometry_msgs::Twist>("velocity", 1000);
 }
 
 DianaPowertrainNode::~DianaPowertrainNode() {
-
+  ros_info("Stopping publish update thread");
+  publishUpdateThread->join();
+  ros_info("powertrain node ended");
 }
 
 void DianaPowertrainNode::setMsgAndServicesEnabled(bool enabled)
@@ -99,9 +103,50 @@ bool DianaPowertrainNode::setOperationModeCallback(diana_powertrain::SetOperatio
   manager.setMotorsOperationMode(mode);
 }
 
+void DianaPowertrainNode::publishUpdate()
+{
+  std::vector<Motor<Pci7841Card>>& motors = manager.getMotors();
+  for(Motor<Pci7841Card> motor : motors) {
+    float vel = motor.getVelocity().get().value;
+    auto it = std::find_if(motorPublishers.begin(), motorPublishers.end(), [&](const MotorPublisher& p) {
+      return p.getId() == motor.getId();
+    });
+    assert(it != motorPublishers.end());
+    MotorPublisher& publisher = *it;
+    publisher.publishVelocity(vel);
+  }
+}
+
 void DianaPowertrainNode::run() {
   ros_info("starting powertrain manager");
-  manager.initiate_clients();
+
+
+  std::vector<int> motorIds;
+  if(n.hasParam("motor_ids")) {
+    motorIds.push_back(11);
+    motorIds.push_back(12);
+    motorIds.push_back(13);
+    motorIds.push_back(14);
+  } else {
+    n.getParam("motor_ids", motorIds);
+  }
+
+  Td::ros_info("Starting motors: " + Td::iterableToString(motorIds));
+
+  for(int motorId : motorIds) {
+    motorPublishers.push_back(MotorPublisher(motorId, n));
+  }
+
+  publishUpdateThread = std::unique_ptr<std::thread>(new std::thread(
+    [&] () {
+      while(ros::ok()) {
+        publishUpdate();
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      }
+    }
+  ));
+
+  manager.initiate_clients(motorIds);
 
   manager.reset_motors();
 

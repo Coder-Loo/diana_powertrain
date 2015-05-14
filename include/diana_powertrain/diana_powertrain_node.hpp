@@ -11,6 +11,10 @@
 #include "diana_powertrain/SetControlWord.h"
 #include "diana_powertrain/GetOperationMode.h"
 #include "diana_powertrain/SetOperationMode.h"
+#include "diana_powertrain/motor_publisher.hpp"
+
+#include <thread>
+#include <memory>
 
 // = n.subscribe("chatter", 1000, chatterCallback);
 class DianaPowertrainNode {
@@ -30,6 +34,7 @@ private:
   bool setControlWordCallback(diana_powertrain::SetControlWord::Request& req, diana_powertrain::SetControlWord::Response& res);
   bool getOperationModeCallback(diana_powertrain::GetOperationMode::Request& req, diana_powertrain::GetOperationMode::Response& res);
   bool setOperationModeCallback(diana_powertrain::SetOperationMode::Request& req, diana_powertrain::SetOperationMode::Response& res);
+  void publishUpdate();
 
 
 private:
@@ -43,6 +48,8 @@ private:
    ros::ServiceServer setStatusWordService;
    ros::ServiceServer getOperationMode;
    ros::ServiceServer setOperationMode;
+   std::unique_ptr<std::thread> publishUpdateThread;
+   std::vector<MotorPublisher> motorPublishers;
 
 };
 
