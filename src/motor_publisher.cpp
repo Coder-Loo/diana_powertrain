@@ -10,9 +10,16 @@ id(id)
   velocityPublisher = nh.advertise<std_msgs::Float32>(Td::toString("wheel_", id, "_speed"), 100);
 }
 
+MotorPublisher::MotorPublisher(const MotorPublisher& oth) :
+id(oth.id),
+velocityPublisher(oth.velocityPublisher)
+{
+
+}
+
 MotorPublisher::~MotorPublisher()
 {
-  velocityPublisher.shutdown();
+  //velocityPublisher.shutdown();
 }
 
 uint32_t MotorPublisher::getId() const

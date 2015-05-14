@@ -9,6 +9,7 @@ class MotorPublisher {
 
 public:
   MotorPublisher(uint32_t id, ros::NodeHandle& nh);
+  MotorPublisher(const MotorPublisher& oth);
   ~MotorPublisher();
 
   uint32_t getId() const;
