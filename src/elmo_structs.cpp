@@ -11,7 +11,7 @@ value(value)
 }
 
 StatusWord::StatusWord(const StatusWord& oth) : value(oth.value) {
- 
+
 }
 
 ElmoStatus StatusWord::getStatus()
@@ -86,7 +86,7 @@ std::string StatusWord::toStringFull()
      << " isWarningOn: " << isWarningOn() << "\n"
      << " isRemoteOn: " << isRemoteOn() << "\n"
      << " isTargetReached: " << isTargetReached() << "\n"
-     << " isInternalLimitActive: " << isInternalLimitActive() << "\n"
+     << " isInternalLimitActive: " << isInternalLimitActive()
      << "\n}";
   return os.str();
 }

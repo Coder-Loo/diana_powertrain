@@ -104,6 +104,7 @@ bool DianaPowertrainNode::setOperationModeCallback(diana_powertrain::SetOperatio
     return false;
   }
   manager.setMotorsOperationMode(mode);
+  return true;
 }
 
 void DianaPowertrainNode::publishUpdate()

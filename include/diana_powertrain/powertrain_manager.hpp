@@ -89,7 +89,7 @@ public:
     for(Motor<T>& m: motors) {
       int motorId = m.getId();
       StatusWord statusWord = m.getStatusWord().get().value;
-      std::cout << "StatusWord of motor " << motorId << ": \n" << statusWord.toStringFull() << " \n";
+      std::cout << "StatusWord of motor " << motorId << ":  " << statusWord << "\n" << statusWord.toStringFull() << " \n";
     }
   }
 
