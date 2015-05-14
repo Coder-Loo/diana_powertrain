@@ -5,6 +5,7 @@
 
 #include <team_diana_lib/logging/logging.h>
 #include <team_diana_lib/strings/strings.h>
+#include <team_diana_lib/strings/bit_printer.h>
 
 #include <cmath>
 
@@ -97,6 +98,7 @@ public:
     for(Motor<T>& m: motors) {
       int motorId = m.getId();
       ModeOfOperation mode = m.getOperationMode().get().value;
+      Td::BitPrinter<4> bitPrinter;
       std::cout << "Operation mode of motor " << motorId << ": \n" << mode << " \n";
     }
   }
