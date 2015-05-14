@@ -34,14 +34,13 @@ void DianaPowertrainNode::setMsgAndServicesEnabled(bool enabled)
 {
   velocitySubscriber.shutdown();
   enableMotorsService.shutdown();
+  getStatusWordService.shutdown();
 
   if(enabled) {
     // TODO: queue size = 1 only for testing, use 1000 after testing.
     velocitySubscriber = n.subscribe("set_velocity", 1, &DianaPowertrainNode::setVelocityCallback, this);
     enableMotorsService = n.advertiseService("enable_motors", &DianaPowertrainNode::setEnableMotorsCallback, this);
-  } else {
-    velocitySubscriber.shutdown();
-    enableMotorsService.shutdown();
+    getStatusWordService = n.advertiseService("get_status_word", &DianaPowertrainNode::getStatusWordCallback, this);
   }
 }
 
@@ -61,6 +60,44 @@ bool DianaPowertrainNode::setEnableMotorsCallback(diana_powertrain::EnableMotors
   return true;
 }
 
+bool DianaPowertrainNode::getStatusWordCallback(diana_powertrain::GetStatusWord::Request& req,
+                                                diana_powertrain::GetStatusWord::Response& res)
+{
+  // TODO: create response response, make it an array of 4 motor status value dict.
+  manager.printMotorsStatusWord();
+  return true;
+}
+
+bool DianaPowertrainNode::setControlWordCallback(diana_powertrain::SetControlWord::Request& req,
+                                                 diana_powertrain::SetControlWord::Response& res)
+{
+  ControlWordCommand command;
+  if(!getControlWordCommandFromString(req.command, command)) {
+    ros_error("Unknown command word: " + req.command);
+    res.ok = false;
+    return false;
+  }
+  manager.setControlWord(command);
+  return true;
+}
+
+bool DianaPowertrainNode::getOperationModeCallback(diana_powertrain::GetOperationMode::Request& req,
+                                                   diana_powertrain::GetOperationMode::Response& res)
+{
+  // Improve response TODO:
+  manager.printMotorsOperationMode();
+  return true;
+}
+
+bool DianaPowertrainNode::setOperationModeCallback(diana_powertrain::SetOperationMode::Request& req, diana_powertrain::SetOperationMode::Response& res)
+{
+  ModeOfOperation mode;
+  if(!getModeOfOperationFromString(req.operation_mode, mode)) {
+    ros_error("Unknown operation mode: " + req.operation_mode);
+    return false;
+  }
+  manager.setMotorsOperationMode(mode);
+}
 
 void DianaPowertrainNode::run() {
   ros_info("starting powertrain manager");

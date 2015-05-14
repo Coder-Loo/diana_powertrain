@@ -58,6 +58,10 @@ find_package(hlcanopen REQUIRED)
  add_service_files(
    FILES
    EnableMotors.srv
+   GetStatusWord.srv
+   SetControlWord.srv
+   GetOperationMode.srv
+   SetOperationMode.srv
 #   Service2.srv
  )
 
@@ -113,6 +117,8 @@ include_directories(
 
 add_library(commons
   src/utils.cpp
+  src/consts.cpp
+  src/elmo_structs.cpp
 )
 
 add_library(pci7841_card

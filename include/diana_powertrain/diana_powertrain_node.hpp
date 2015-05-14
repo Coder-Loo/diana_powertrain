@@ -7,6 +7,10 @@
 #include "diana_powertrain/powertrain_manager.hpp"
 #include "diana_powertrain/pci7841_card.hpp"
 #include "diana_powertrain/EnableMotors.h"
+#include "diana_powertrain/GetStatusWord.h"
+#include "diana_powertrain/SetControlWord.h"
+#include "diana_powertrain/GetOperationMode.h"
+#include "diana_powertrain/SetOperationMode.h"
 
 // = n.subscribe("chatter", 1000, chatterCallback);
 class DianaPowertrainNode {
@@ -22,6 +26,10 @@ public:
 private:
   void setVelocityCallback(const geometry_msgs::Twist& msg);
   bool setEnableMotorsCallback(diana_powertrain::EnableMotors::Request& req, diana_powertrain::EnableMotors::Response& res);
+  bool getStatusWordCallback(diana_powertrain::GetStatusWord::Request& req, diana_powertrain::GetStatusWord::Response& res);
+  bool setControlWordCallback(diana_powertrain::SetControlWord::Request& req, diana_powertrain::SetControlWord::Response& res);
+  bool getOperationModeCallback(diana_powertrain::GetOperationMode::Request& req, diana_powertrain::GetOperationMode::Response& res);
+  bool setOperationModeCallback(diana_powertrain::SetOperationMode::Request& req, diana_powertrain::SetOperationMode::Response& res);
 
 
 private:
@@ -31,6 +39,11 @@ private:
    ros::Subscriber velocitySubscriber;
    ros::Publisher velocityPublisher;
    ros::ServiceServer enableMotorsService;
+   ros::ServiceServer getStatusWordService;
+   ros::ServiceServer setStatusWordService;
+   ros::ServiceServer getOperationMode;
+   ros::ServiceServer setOperationMode;
+
 };
 
 #endif // DIANAPOWERTRAINNODE_HPP

@@ -9,7 +9,9 @@ Pci7841Card::Pci7841Card(int cardNum, int portNum)
 {
   handle = CanOpenDriver(cardNum, portNum);
   if(handle < 0) {
-    LOG(ERROR) << "Unable to open driver" << cardNum << ":" << portNum;
+    std::string msg = "Unable to open driver";
+    LOG(ERROR) << msg << cardNum << ":" << portNum;
+    throw new std::runtime_error(msg);
   } else {
     PORT_STRUCT setPort;
     setPort.mode = BIT11;

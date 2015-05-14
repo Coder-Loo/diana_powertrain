@@ -84,6 +84,37 @@ public:
     });
   }
 
+  void printMotorsStatusWord() {
+    for(Motor<T>& m: motors) {
+      int motorId = m.getId();
+      StatusWord statusWord = m.getStatusWord().get().value;
+      std::cout << "StatusWord of motor " << motorId << ": \n" << statusWord.toStringFull() << " \n";
+    }
+  }
+
+  void setControlWord(ControlWordCommand command) {
+    for(Motor<T>& m: motors) {
+      int motorId = m.getId();
+      Td::ros_info(Td::toString("Setting control word of motor: " + motorId));
+      m.setControlWord(command);
+    }
+  }
+
+
+  void printMotorsOperationMode() {
+    for(Motor<T>& m: motors) {
+      int motorId = m.getId();
+      ModeOfOperation mode = m.getOperationMode().get().value;
+      std::cout << "Operation mode of motor " << motorId << ": \n" << mode << " \n";
+    }
+  }
+
+  void setMotorsOperationMode(ModeOfOperation mode) {
+    std::for_each(motors.begin(), motors.end(), [mode](Motor<T>& m) {
+      m.setOperationMode(mode);
+    });
+  }
+
   std::future<bool> set_motors_enabled(bool enabled) {
     Td::ros_info(Td::toString("Set motor enabled: ", enabled));
     std::vector<std::future<MotorAsyncResult>> results;
@@ -103,25 +134,6 @@ public:
         Td::ros_error(Td::toString("Motor ", m.getId(), " NOT enabled"));
       }
     }
-
-//     std::transform(motors.begin(), motors.end(), results.begin(), [&](Motor<T>& m) {
-//       std::future<MotorAsyncResult> r;
-//       if(enabled) {
-//         r = m.enable();
-//       } else {
-//         r = m.disable();
-//       }
-//       return r;
-//     });
-//
-//     Td::ros_info(Td::toString("check results async: "));
-//     return std::async(std::launch::deferred, [&]() {
-//       return std::all_of(results.begin(), results.end(), [&](std::future<MotorAsyncResult>& motorOk) {
-//         Td::ros_info(Td::toString("checking a motor: "));
-//         return motorOk.get().ok == true;
-//       });
-//     });
-
     return std::async(std::launch::deferred, [](){ return true; });
   }
 
