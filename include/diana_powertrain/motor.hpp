@@ -176,12 +176,16 @@ public:
     // TODO: this is still in testing:
     return setVelocitySdoOnly(MetersPerSecond*MPS_JV_FACTOR);
   }
-
+  
   std::future<MotorAsyncResult> setVelocitySdoOnly(int value) {
     auto res = manager.template writeSdoRemote(nodeId, TARGET_VELOCITY, value, 1500);
     return completeWriteResult(std::move(res));
   }
 
+  void setVelocityPdo(float MetersPerSecond) {
+    manager.template writeSdoLocal(nodeId, TARGET_VELOCITY, MetersPerSecond*MPS_JV_FACTOR);
+    manager.writeRPDO(nodeId, TARGET_VELOCITY_COB_ID);
+  }
 
   std::future<MotorAsyncValue<float>> getVelocity() {
     auto res = manager.template readSdoRemote<int32_t>(nodeId, VELOCITY_ACTUAL_VALUE, 1500);
@@ -190,6 +194,10 @@ public:
       float vel = velocityResult.get();
       return make_motor_async_value(vel, ok);
     });
+  }
+  
+  float getVelocityPdo() {
+    return manager.readSdoLocal(nodeId, VELOCITY_ACTUAL_VALUE);
   }
 
   int getId() const {

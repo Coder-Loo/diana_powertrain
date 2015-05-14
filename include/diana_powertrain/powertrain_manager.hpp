@@ -48,6 +48,37 @@ public:
     for(int motorId : motorIds) {
       manager.initNode(motorId, hlcanopen::NodeManagerType::CLIENT);
       motors.push_back(Motor<T>(manager, motorId));
+
+      hlcanopen::PdoConfiguration configTargetVel(hlcanopen::RPDO, 1);
+
+      hlcanopen::COBIdPdoEntry cobIdPdoTargetVel;
+      cobIdPdoTargetVel.setCobId(hlcanopen::COBId(motorId, TARGET_VELOCITY_COB_ID));
+      cobIdPdoTargetVel.enable29bitId(false);
+      cobIdPdoTargetVel.enableRtr(false);
+      cobIdPdoTargetVel.enablePdo(true);
+
+      configTargetVel.setCobId(cobIdPdoTargetVel);
+      configTargetVel.setTransmissionType(hlcanopen::ASYNCHRONOUS);
+      configTargetVel.setNumberOfEntries();
+
+      configTargetVel.addMapping(TARGET_VELOCITY, TARGET_VELOCITY, 0x20);
+
+      hlcanopen::PdoConfiguration configActualVel(hlcanopen::TPDO, 1);
+
+      hlcanopen::COBIdPdoEntry cobIdPdoActualVel;
+      cobIdPdoActualVel.setCobId(hlcanopen::COBId(motorId, VELOCITY_ACTUAL_COD_ID));
+      cobIdPdoActualVel.enable29bitId(false);
+      cobIdPdoActualVel.enableRtr(false);
+      cobIdPdoActualVel.enablePdo(true);
+
+      configActualVel.setCobId(cobIdPdoActualVel);
+      configActualVel.setTransmissionType(hlcanopen::ASYNCHRONOUS);
+      configActualVel.setNumberOfEntries();
+
+      configActualVel.addMapping(VELOCITY_ACTUAL_VALUE, VELOCITY_ACTUAL_VALUE, 0x20);
+
+      manager.writePdoConfiguration(motorId, configTargetVel);
+      manager.writePdoConfiguration(motorId, configActualVel);
     }
 
     Td::ros_info("starting CANopen manager thread");
