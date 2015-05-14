@@ -146,14 +146,15 @@ public:
     std::vector<std::future<MotorAsyncResult>> results;
 
 
+    const unsigned int  pause = 250;
     results.push_back(motors[0].setVelocity(right_v));
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    std::this_thread::sleep_for(std::chrono::milliseconds(pause));
     results.push_back(motors[1].setVelocity(right_v));
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    std::this_thread::sleep_for(std::chrono::milliseconds(pause));
     results.push_back(motors[2].setVelocity(left_v));
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    std::this_thread::sleep_for(std::chrono::milliseconds(pause));
     results.push_back(motors[3].setVelocity(left_v));
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    std::this_thread::sleep_for(std::chrono::milliseconds(pause));
 
 //     motors[RIGHT_FRONT_INDEX].setVelocity(right_v);
 //     motors[RIGHT_REAR_INDEX].setVelocity(right_v);
@@ -161,12 +162,13 @@ public:
 //     motors[LEFT_REAR_INDEX].setVelocity(left_v);
 
     for(std::future<MotorAsyncResult>& r: results) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(250));
+      const unsigned int  pause = 250;
+      std::this_thread::sleep_for(std::chrono::milliseconds(pause));
       MotorAsyncResult result =  r.get();
       if(!result.ok)  {
         Td::ros_warn("Error while setting velocity of motor");
       }
-      std::this_thread::sleep_for(std::chrono::milliseconds(250));
+      std::this_thread::sleep_for(std::chrono::milliseconds(pause));
     }
 
     return true;
