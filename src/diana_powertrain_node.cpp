@@ -39,6 +39,8 @@ void DianaPowertrainNode::setMsgAndServicesEnabled(bool enabled)
   velocitySubscriber.shutdown();
   enableMotorsService.shutdown();
   getStatusWordService.shutdown();
+  setOperationModeService.shutdown();
+  getOperationModeService.shutdown();
 
   if(enabled) {
     // TODO: queue size = 1 only for testing, use 1000 after testing.
