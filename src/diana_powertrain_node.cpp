@@ -39,12 +39,17 @@ void DianaPowertrainNode::setMsgAndServicesEnabled(bool enabled)
   velocitySubscriber.shutdown();
   enableMotorsService.shutdown();
   getStatusWordService.shutdown();
+  setOperationModeService.shutdown();
+  getOperationModeService.shutdown();
 
   if(enabled) {
     // TODO: queue size = 1 only for testing, use 1000 after testing.
     velocitySubscriber = n.subscribe("set_velocity", 1, &DianaPowertrainNode::setVelocityCallback, this);
     enableMotorsService = n.advertiseService("enable_motors", &DianaPowertrainNode::setEnableMotorsCallback, this);
+    setStatusWordService = n.advertiseService("set_control_word", &DianaPowertrainNode::setControlWordCallback, this);
     getStatusWordService = n.advertiseService("get_status_word", &DianaPowertrainNode::getStatusWordCallback, this);
+    setOperationModeService = n.advertiseService("set_operation_mode", &DianaPowertrainNode::setOperationModeCallback, this);
+    getOperationModeService = n.advertiseService("get_operation_mode", &DianaPowertrainNode::getOperationModeCallback, this);
   }
 }
 
@@ -101,6 +106,7 @@ bool DianaPowertrainNode::setOperationModeCallback(diana_powertrain::SetOperatio
     return false;
   }
   manager.setMotorsOperationMode(mode);
+  return true;
 }
 
 void DianaPowertrainNode::publishUpdate()

@@ -46,8 +46,8 @@ private:
    ros::ServiceServer enableMotorsService;
    ros::ServiceServer getStatusWordService;
    ros::ServiceServer setStatusWordService;
-   ros::ServiceServer getOperationMode;
-   ros::ServiceServer setOperationMode;
+   ros::ServiceServer getOperationModeService;
+   ros::ServiceServer setOperationModeService;
    std::unique_ptr<std::thread> publishUpdateThread;
    std::vector<MotorPublisher> motorPublishers;
 

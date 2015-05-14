@@ -107,10 +107,10 @@ public:
 
   std::future<MotorAsyncValue<StatusWord>> getStatusWord() {
     Td::ros_info("requestig status word");
-    auto res = manager.template readSdoRemote<uint16_t>(nodeId, STATUS_WORD, 1000);
-    return Td::then(std::move(res), [](hlcanopen::SdoResponse<uint16_t> readResult) {
+    auto res = manager.template readSdoRemote<uint32_t>(nodeId, STATUS_WORD, 1000);
+    return Td::then(std::move(res), [](hlcanopen::SdoResponse<uint32_t> readResult) {
       if(readResult.ok()) {
-        uint16_t statusWordValue = readResult.get();
+        uint32_t statusWordValue = readResult.get();
         StatusWord statusWord(statusWordValue);
         return make_motor_async_value(statusWord);
       } else {
