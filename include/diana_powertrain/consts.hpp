@@ -14,7 +14,9 @@ const hlcanopen::SDOIndex SHUT_DOWN_OPTION_CODE = hlcanopen::SDOIndex(0x605B, 0)
 const hlcanopen::SDOIndex MODE_OF_OPERATION = hlcanopen::SDOIndex(0x6060, 0);
 const hlcanopen::SDOIndex MODE_OF_OPERATION_DISPLAY = hlcanopen::SDOIndex(0x6061, 0);
 const hlcanopen::SDOIndex VELOCITY_ACTUAL_VALUE = hlcanopen::SDOIndex(0x606C, 0);
+const unsigned int VELOCITY_ACTUAL_COD_ID = 0x180;
 const hlcanopen::SDOIndex TARGET_VELOCITY = hlcanopen::SDOIndex(0x60FF, 0);
+const unsigned int TARGET_VELOCITY_COB_ID = 0x200;
 // hlcanopen::SDOIndex = hlcanopen::SDOIndex(0x, 0);
 
 enum  {

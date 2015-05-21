@@ -143,14 +143,14 @@ void DianaPowertrainNode::run() {
     motorPublishers.push_back(MotorPublisher(motorId, n));
   }
 
-  publishUpdateThread = std::unique_ptr<std::thread>(new std::thread(
-    [&] () {
-      while(ros::ok()) {
-        publishUpdate();
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
-      }
-    }
-  ));
+  //publishUpdateThread = std::unique_ptr<std::thread>(new std::thread(
+    //[&] () {
+      //while(ros::ok()) {
+        //publishUpdate();
+        //std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      //}
+    //}
+  //));
 
   manager.initiate_clients(motorIds);
 

@@ -44,19 +44,41 @@ public:
 
   void initiate_clients(const std::vector<int>& motorIds) {
     Td::ros_info("initiating clients");
-//     std::array<int, 4> client_ids = {RIGHT_REAR_ID, RIGHT_FRONT_ID, LEFT_FRONT_ID, LEFT_REAR_ID};
-//
-//     std::for_each(client_ids.begin(), client_ids.end(), [&](int clientId) {
-//       manager.initNode(clientId, hlcanopen::NodeManagerType::CLIENT);
-//     });
-
-//     for(auto i = 0; i < 4; i++) {
-//         motors[i] = Motor<T>(manager, client_ids[i]);
-//     }
 
     for(int motorId : motorIds) {
       manager.initNode(motorId, hlcanopen::NodeManagerType::CLIENT);
       motors.push_back(Motor<T>(manager, motorId));
+
+      //hlcanopen::PdoConfiguration configTargetVel(hlcanopen::RPDO, 1);
+
+      //hlcanopen::COBIdPdoEntry cobIdPdoTargetVel;
+      //cobIdPdoTargetVel.setCobId(hlcanopen::COBId(motorId, TARGET_VELOCITY_COB_ID));
+      //cobIdPdoTargetVel.enable29bitId(false);
+      //cobIdPdoTargetVel.enableRtr(false);
+      //cobIdPdoTargetVel.enablePdo(true);
+
+      //configTargetVel.setCobId(cobIdPdoTargetVel);
+      //configTargetVel.setTransmissionType(hlcanopen::ASYNCHRONOUS);
+      //configTargetVel.setNumberOfEntries();
+
+      //configTargetVel.addMapping(TARGET_VELOCITY, TARGET_VELOCITY, 0x20);
+
+      //hlcanopen::PdoConfiguration configActualVel(hlcanopen::TPDO, 1);
+
+      //hlcanopen::COBIdPdoEntry cobIdPdoActualVel;
+      //cobIdPdoActualVel.setCobId(hlcanopen::COBId(motorId, VELOCITY_ACTUAL_COD_ID));
+      //cobIdPdoActualVel.enable29bitId(false);
+      //cobIdPdoActualVel.enableRtr(false);
+      //cobIdPdoActualVel.enablePdo(true);
+
+      //configActualVel.setCobId(cobIdPdoActualVel);
+      //configActualVel.setTransmissionType(hlcanopen::ASYNCHRONOUS);
+      //configActualVel.setNumberOfEntries();
+
+      //configActualVel.addMapping(VELOCITY_ACTUAL_VALUE, VELOCITY_ACTUAL_VALUE, 0x20);
+
+      //manager.writePdoConfiguration(motorId, configTargetVel);
+      //manager.writePdoConfiguration(motorId, configActualVel);
     }
 
     Td::ros_info("starting CANopen manager thread");
@@ -161,21 +183,18 @@ public:
 
 
     for(Motor<T> motor : motors) {
-      if(motor.getId() == 11 || motor.getId() == 14) {
+      if(motor.getId() == 11 || motor.getId() == 12) {
         motor.setVelocity(right_v);
       } else {
         motor.setVelocity(left_v);
       }
-      std::this_thread::sleep_for(std::chrono::milliseconds(250));
     }
 
     for(std::future<MotorAsyncResult>& r: results) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(250));
       MotorAsyncResult result =  r.get();
       if(!result.ok)  {
         Td::ros_warn("Error while setting velocity of motor");
       }
-      std::this_thread::sleep_for(std::chrono::milliseconds(250));
     }
 
     return true;
