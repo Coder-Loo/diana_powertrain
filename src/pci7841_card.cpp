@@ -63,16 +63,16 @@ hlcanopen::CanMsg Pci7841Card::read()
       //LOG(DEBUG) << "receiving data len: " << (unsigned int)canPacket.len ;
     auto canId = getCanId(canPacket.CAN_ID);
     if(getCanId(canPacket.CAN_ID) == 0 || getCanId(canPacket.CAN_ID) == 0x60 || canId == 0x40) {
-      //LOG(DEBUG) << "receiving data: " <<
-        //" -- COB-ID:  " << canPacket.CAN_ID <<
-        //" can-id:  " << getCanId(canPacket.CAN_ID) << " -- data: " <<
-        //packetDataToStr(canPacket);
-      memset(&canPacket, 0, sizeof(canPacket));
-    } else {
 //      LOG(DEBUG) << "receiving data: " <<
 //        " -- COB-ID:  " << canPacket.CAN_ID <<
 //        " can-id:  " << getCanId(canPacket.CAN_ID) << " -- data: " <<
 //        packetDataToStr(canPacket);
+      memset(&canPacket, 0, sizeof(canPacket));
+    } else {
+      LOG(DEBUG) << "receiving data: " <<
+        " -- COB-ID:  " << canPacket.CAN_ID <<
+        " can-id:  " << getCanId(canPacket.CAN_ID) << " -- data: " <<
+        packetDataToStr(canPacket);
     }
   } else {
     //LOG(DEBUG) << "no data received ";
@@ -92,8 +92,8 @@ hlcanopen::CanMsg Pci7841Card::read()
 
 void Pci7841Card::sendCanPacket(CAN_PACKET& packet)
 {
-//    LOG(DEBUG) << "Sending to canId " << std::hex <<
-//      packet.CAN_ID <<  " data: " << packetDataToStr(packet);
+    LOG(DEBUG) << "Sending to canId " << std::hex <<
+      packet.CAN_ID <<  " data: " << packetDataToStr(packet);
 
     CanSendMsg(handle, &packet);
 }
