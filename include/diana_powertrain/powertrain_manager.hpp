@@ -97,7 +97,7 @@ public:
   void setControlWord(ControlWordCommand command) {
     for(Motor<T>& m: motors) {
       int motorId = m.getId();
-      Td::ros_info(Td::toString("Setting control word of motor: " + motorId));
+      Td::ros_info(Td::toString("Setting control word of motor: ", motorId));
       m.setControlWord(command);
     }
   }
