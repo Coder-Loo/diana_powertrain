@@ -10,6 +10,7 @@
 #include <cmath>
 
 #include <hlcanopen/can_open_manager.hpp>
+#include <hlcanopen/executor/unique_thread_executor.hpp>
 
 #include <vector>
 
@@ -32,7 +33,10 @@ enum {
 
 template <class T> class PowertrainManager {
 public:
-  PowertrainManager(T& card) : manager(card, std::chrono::milliseconds(50)) {}
+  PowertrainManager(T& card) : manager(card, std::chrono::milliseconds(50)) {
+    manager.setupLogging();
+    manager.setDefaultFutureExecutor(futureExecutor);
+  }
 
   PowertrainManager(const PowertrainManager<T>& oth) = delete;
 
@@ -203,6 +207,7 @@ private:
   hlcanopen::CanOpenManager<T> manager;
   std::vector<Motor<T>> motors;
   std::thread canOpenManagerThread;
+  std::shared_ptr<hlcanopen::UniqueThreadExecutor> futureExecutor;
 };
 
 #endif // POWERTRAIN_MANAGER_HPP
