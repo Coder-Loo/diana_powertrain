@@ -11,46 +11,13 @@
 
 #include <team_diana_lib/logging/logging.h>
 #include <team_diana_lib/strings/strings.h>
-#include <team_diana_lib/async/futures.h>
 #include <team_diana_lib/enum/enum.h>
+
+#include <folly/futures/Future.h>
 
 #include "utils.hpp"
 
 #include <functional>
-
-
-struct MotorAsyncResult {
-  bool ok;
-};
-
-template <typename T> struct  MotorAsyncValue : public MotorAsyncResult {
-  MotorAsyncValue(const T& value) : value(value) {
-    ok = true;
-  }
-
-  T value;
-};
-
-template <typename T> MotorAsyncValue<T> make_motor_async_value(const T& value, bool ok = true) {
-    MotorAsyncValue<T> v(value);
-    v.ok = ok;
-    return v;
-}
-
-
-
-std::future<MotorAsyncResult> ifResultOkThen(std::future<MotorAsyncResult> f, std::function<MotorAsyncResult()> fun) {
-  return Td::then(std::move(f), [fun](MotorAsyncResult r) {
-    Td::ros_info(Td::toString(" last result is ", r.ok));
-    if(r.ok == true) {
-      return fun();
-    } else {
-      MotorAsyncResult failedRes;
-      failedRes.ok = false;
-      return failedRes;
-    }
-  });
-}
 
 template <class T> class Motor {
 
@@ -64,79 +31,51 @@ public:
   Motor(const Motor<T>& oth) :
     manager(oth.manager),
     nodeId(oth.nodeId) {
-
   }
 
   ~Motor() {}
 
-  std::future<MotorAsyncResult> enable() {
+  folly::Future<folly::Unit> enable() {
     return send_msg_async("MO=1", "enable()");
   }
-  std::future<MotorAsyncResult> disable() {
+  folly::Future<folly::Unit> disable() {
     return send_msg_async("MO=0", "disable()");
   }
 
-  std::future<MotorAsyncResult> start() {
+  folly::Future<folly::Unit> start() {
     return send_msg_async("BG", "start()");
   }
 
-  std::future<MotorAsyncResult> stop() {
+  folly::Future<folly::Unit> stop() {
     return send_msg_async("ST", "stop()");
   }
 
-  template <typename K> std::future<MotorAsyncResult> completeWriteResult(
-    std::future<hlcanopen::SdoResponse<K>>&& writeResult, std::string desc = "write" ) {
-    return Td::then(std::move(writeResult), [desc](hlcanopen::SdoResponse<bool> writeResult) {
-      bool ok = writeResult.get();
-      MotorAsyncResult asyncRes;
-      asyncRes.ok = ok;
-      if(!ok) {
-        Td::ros_warn(desc + " failed");
-      }
-      return asyncRes;
-
-    });
-  }
-
-  std::future<MotorAsyncResult> setControlWord(ControlWordCommand command) {
+  folly::Future<folly::Unit> setControlWord(ControlWordCommand command) {
     uint32_t controlWord = 0;
     controlWord |= getControlWordCommandBits(command);
-    auto res = manager.template writeSdoRemote(nodeId, CONTROL_WORD, controlWord, 2000);
-    return completeWriteResult(std::move(res));
+    return manager.template writeSdoRemote(nodeId, CONTROL_WORD, controlWord, 2000);
   }
 
-  std::future<MotorAsyncValue<StatusWord>> getStatusWord() {
+  folly::Future<StatusWord> getStatusWord() {
     Td::ros_info("requestig status word");
-    auto res = manager.template readSdoRemote<uint32_t>(nodeId, STATUS_WORD, 1000);
-    return Td::then(std::move(res), [](hlcanopen::SdoResponse<uint32_t> readResult) {
-      if(readResult.ok()) {
-        uint32_t statusWordValue = readResult.get();
+    folly::Future<uint32_t> res = manager.template readSdoRemote<uint32_t>(nodeId, STATUS_WORD, 1000);
+    return res.then([](uint32_t statusWordValue) {
         StatusWord statusWord(statusWordValue);
-        return make_motor_async_value(statusWord);
-      } else {
-        Td::ros_warn("Unable to read status word");
-        return make_motor_async_value(StatusWord(0), false);
-      }
+        return statusWord;
     });
   }
 
-  std::future<MotorAsyncResult> setOperationMode(ModeOfOperation mode) {
+  folly::Future<folly::Unit> setOperationMode(ModeOfOperation mode) {
     uint32_t value = Td::to_int(mode);
-    auto res = manager.template writeSdoRemote(nodeId, MODE_OF_OPERATION, value, 1000);
-    return completeWriteResult(std::move(res), "operation mode write");
+    return manager.template writeSdoRemote(nodeId, MODE_OF_OPERATION, value, 1000);
   }
 
-  std::future<MotorAsyncValue<ModeOfOperation>> getOperationMode() {
+  folly::Future<ModeOfOperation> getOperationMode() {
     Td::ros_info("requestig mode of operation");
-    auto res = manager.template readSdoRemote<uint32_t>(nodeId, MODE_OF_OPERATION_DISPLAY, 1000);
-    return Td::then(std::move(res), [](hlcanopen::SdoResponse<uint32_t> readResult) {
-      if(readResult.ok()) {
-        ModeOfOperation modeOfOperation = (ModeOfOperation) readResult.get();
-        return make_motor_async_value(modeOfOperation);
-      } else {
-        Td::ros_warn("Unable to read operation mode");
-        return make_motor_async_value(ModeOfOperation::NO_MODE, false);
-      }
+    folly::Future<uint32_t> res = manager.template readSdoRemote<uint32_t>(nodeId, MODE_OF_OPERATION_DISPLAY, 1000);
+    return res.then([](uint32_t modeOfOperationValue) {
+        ModeOfOperation modeOfOperation = (ModeOfOperation) modeOfOperationValue;
+        return modeOfOperation;
     });
   }
 
@@ -144,7 +83,7 @@ public:
   bool setCommandMode() {
     manager.startRemoteNode(nodeId);
     mssleep(4000);
-    return manager.template writeSdoRemote<uint32_t>(nodeId, OS_COMMAND_MODE, 0).get().get();
+    return manager.template writeSdoRemote<uint32_t>(nodeId, OS_COMMAND_MODE, 0).wait().hasValue();
   }
 
   void send_msg_sync(const std::string& msg, const std::string& desc) {
@@ -155,31 +94,20 @@ public:
     }
   }
 
-  std::future<MotorAsyncResult> send_msg_async(const std::string& msg, const std::string& desc) {
+  folly::Future<folly::Unit> send_msg_async(const std::string& msg, const std::string& desc) {
     Td::ros_info(Td::toString("Sending msg to shell ", nodeId, ": ", msg));
-    auto res =  manager.writeSdoRemote(nodeId, OS_COMMAND_PROMPT_WRITE, msg, 1500);
-    return Td::then(std::move(res), [desc](hlcanopen::SdoResponse<bool> writeResult) {
-      bool ok = writeResult.get();
-      MotorAsyncResult asyncRes;
-      asyncRes.ok = ok;
-      if(!ok) {
-        Td::ros_warn(desc + " failed");
-      }
-      return asyncRes;
-
-    });
+    return manager.writeSdoRemote(nodeId, OS_COMMAND_PROMPT_WRITE, msg, 1500);
   }
 
-  std::future<MotorAsyncResult> setVelocity(float MetersPerSecond) {
+  folly::Future<folly::Unit> setVelocity(float MetersPerSecond) {
 //     return setJVVelocity(MetersPerSecond*MPS_JV_FACTOR);
 
     // TODO: this is still in testing:
     return setVelocitySdoOnly(MetersPerSecond*MPS_JV_FACTOR);
   }
-  
-  std::future<MotorAsyncResult> setVelocitySdoOnly(int value) {
-    auto res = manager.template writeSdoRemote(nodeId, TARGET_VELOCITY, value, 1500);
-    return completeWriteResult(std::move(res));
+
+  folly::Future<folly::Unit> setVelocitySdoOnly(int value) {
+      return manager.template writeSdoRemote(nodeId, TARGET_VELOCITY, value, 1500);
   }
 
   void setVelocityPdo(float MetersPerSecond) {
@@ -187,15 +115,13 @@ public:
     manager.writeRPDO(nodeId, TARGET_VELOCITY_COB_ID);
   }
 
-  std::future<MotorAsyncValue<float>> getVelocity() {
+  folly::Future<float> getVelocity() {
     auto res = manager.template readSdoRemote<int32_t>(nodeId, VELOCITY_ACTUAL_VALUE, 1500);
-    return Td::then(std::move(res), [](hlcanopen::SdoResponse<int32_t> velocityResult) {
-      bool ok = velocityResult.ok();
-      float vel = velocityResult.get();
-      return make_motor_async_value(vel, ok);
+    return res.then([](int32_t velValue) {
+      return (float)velValue;
     });
   }
-  
+
   float getVelocityPdo() {
     return manager.readSdoLocal(nodeId, VELOCITY_ACTUAL_VALUE);
   }
@@ -224,13 +150,13 @@ private:
     return speed;
   }
 
-  std::future<MotorAsyncResult> setJVVelocity(int velocity) {
+  folly::Future<folly::Unit> setJVVelocity(int velocity) {
     velocity = clampJVToSafe(velocity);
 
-    std::future<MotorAsyncResult> res;
+    folly::Future<folly::Unit> res;
     res = send_msg_async(Td::toString("JV=", velocity), Td::toString("JV=", velocity));
 
-    return ifResultOkThen(std::move(res), [&, velocity]() {
+    return res.then([&, velocity]() {
       if(velocity == 0) {
         return stop().get();
       } else {

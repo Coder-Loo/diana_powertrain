@@ -113,7 +113,7 @@ void DianaPowertrainNode::publishUpdate()
 {
   std::vector<Motor<Pci7841Card>>& motors = manager.getMotors();
   for(Motor<Pci7841Card> motor : motors) {
-    float vel = motor.getVelocity().get().value;
+    float vel = motor.getVelocity().get();
     auto it = std::find_if(motorPublishers.begin(), motorPublishers.end(), [&](const MotorPublisher& p) {
       return p.getId() == motor.getId();
     });
@@ -156,7 +156,10 @@ void DianaPowertrainNode::run() {
 
   manager.reset_motors();
 
-  std::future<bool> ok = manager.set_motors_enabled(true);
+  bool ok = manager.set_motors_enabled(true);
+  if(!ok) {
+    ros_error("unable to enable motors");
+  }
 //   ok.get();
 
   setMsgAndServicesEnabled(true);

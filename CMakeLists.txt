@@ -144,6 +144,8 @@ target_link_libraries(diana_powertrain_node
    ${hlcanopen_LIBRARIES}
    pci7841_card
    commons
+   folly
+   glog
  )
 
 add_executable(test_motor
@@ -156,6 +158,7 @@ target_link_libraries(test_motor
    ${hlcanopen_LIBRARIES}
    pci7841_card
    commons
+   glog
  )
 
 add_library(command_line
@@ -181,6 +184,8 @@ target_link_libraries(shell
    pci7841_card
    command_line
    commons
+   folly
+   glog
  )
 
 install(TARGETS pci7841_card

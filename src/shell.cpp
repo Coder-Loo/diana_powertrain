@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
   mssleep(4000);
   auto res = canOpenManager.writeSdoRemote<uint32_t>(motorId, OS_COMMAND_MODE, 0);
 
-  if(!res.get().ok()) {
+  if(!res.wait().hasValue()) {
     ros_error("Unable to set command mode");
     return -1;
   }
@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
       break;
     }
     auto res = canOpenManager.writeSdoRemote(motorId, OS_COMMAND_PROMPT_WRITE, s);
-    if(res.get().ok()) {
+    if(res.wait().hasValue()) {
       ros_info("sent new command");
     } else {
       ros_error("error while sending new command");

@@ -111,7 +111,7 @@ public:
   void printMotorsStatusWord() {
     for(Motor<T>& m: motors) {
       int motorId = m.getId();
-      StatusWord statusWord = m.getStatusWord().get().value;
+      StatusWord statusWord = m.getStatusWord().get();
       std::cout << "StatusWord of motor " << motorId << ":  " << statusWord << "\n" << statusWord.toStringFull() << " \n";
     }
   }
@@ -128,7 +128,7 @@ public:
   void printMotorsOperationMode() {
     for(Motor<T>& m: motors) {
       int motorId = m.getId();
-      ModeOfOperation mode = m.getOperationMode().get().value;
+      ModeOfOperation mode = m.getOperationMode().get();
       Td::BitPrinter<4> bitPrinter;
       std::cout << "Operation mode of motor " << motorId << ": \n" << mode << " \n";
     }
@@ -140,26 +140,30 @@ public:
     });
   }
 
-  std::future<bool> set_motors_enabled(bool enabled) {
+  bool set_motors_enabled(bool enabled) {
     Td::ros_info(Td::toString("Set motor enabled: ", enabled));
-    std::vector<std::future<MotorAsyncResult>> results;
+    bool ok = true;
 
     for(Motor<T>& m: motors) {
-      MotorAsyncResult r;
-      std::this_thread::sleep_for(std::chrono::milliseconds(250));
+      folly::Future<folly::Unit> enableActionResult;
       if(enabled)  {
-       r = m.enable().get();
+       enableActionResult = m.enable();
       } else {
-       r = m.disable().get();
+       enableActionResult = m.disable();
       }
-      std::this_thread::sleep_for(std::chrono::milliseconds(250));
-      if(r.ok) {
+
+      enableActionResult.wait();
+
+      if(enableActionResult.hasValue()) {
         Td::ros_info(Td::toString("Motor ", m.getId(), enabled ? " enabled" : " disabled"));
       } else {
         Td::ros_error(Td::toString("Motor ", m.getId(), " NOT enabled"));
+        ok = false;
       }
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
-    return std::async(std::launch::deferred, [](){ return true; });
+
+    return ok;
   }
 
   bool set_velocity(double linear_v, double angular_v) {
@@ -179,21 +183,12 @@ public:
       left_v = clamp(left_v, MIN_V, MAX_V );
     }
 
-    std::vector<std::future<MotorAsyncResult>> results;
-
 
     for(Motor<T> motor : motors) {
       if(motor.getId() == 11 || motor.getId() == 12) {
         motor.setVelocity(right_v);
       } else {
         motor.setVelocity(left_v);
-      }
-    }
-
-    for(std::future<MotorAsyncResult>& r: results) {
-      MotorAsyncResult result =  r.get();
-      if(!result.ok)  {
-        Td::ros_warn("Error while setting velocity of motor");
       }
     }
 
