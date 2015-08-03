@@ -141,6 +141,7 @@ public:
   void setMotorsOperationMode(ModeOfOperation mode) {
     std::for_each(motors.begin(), motors.end(), [mode](Motor<T>& m) {
       m.setOperationMode(mode);
+      mssleep(200);
     });
   }
 
@@ -194,6 +195,7 @@ public:
       } else {
         motor.setVelocity(left_v);
       }
+      mssleep(100);
     }
 
     return true;

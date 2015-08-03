@@ -3,6 +3,8 @@
 
 #include <hlcanopen/can_msg.hpp>
 
+#include <queue>
+
 extern "C" {
   #include "pci_7841.h"
 }
@@ -41,14 +43,15 @@ private:
   std::string packetDataToStr(const CAN_PACKET& packet);
   unsigned int getCanId(long unsigned int cobId);
   unsigned int getCOBType(long unsigned int cobId);
+
+private:
   int cardNum;
   int portNum;
 
   int redLed;
   int greenLed;
-
-private:
   int handle;
+  std::queue<hlcanopen::CanMsg> msgQueue;
 
 };
 

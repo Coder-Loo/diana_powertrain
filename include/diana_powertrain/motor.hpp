@@ -36,18 +36,18 @@ public:
   ~Motor() {}
 
   folly::Future<folly::Unit> enable() {
-    return send_msg_async("MO=1", "enable()");
+    return send_msg_async("MO=1");
   }
   folly::Future<folly::Unit> disable() {
-    return send_msg_async("MO=0", "disable()");
+    return send_msg_async("MO=0");
   }
 
   folly::Future<folly::Unit> start() {
-    return send_msg_async("BG", "start()");
+    return send_msg_async("BG");
   }
 
   folly::Future<folly::Unit> stop() {
-    return send_msg_async("ST", "stop()");
+    return send_msg_async("ST");
   }
 
   folly::Future<folly::Unit> setControlWord(ControlWordCommand command) {
@@ -94,7 +94,7 @@ public:
     }
   }
 
-  folly::Future<folly::Unit> send_msg_async(const std::string& msg, const std::string& desc) {
+  folly::Future<folly::Unit> send_msg_async(const std::string& msg) {
     Td::ros_info(Td::toString("Sending msg to shell ", nodeId, ": ", msg));
     return manager.writeSdoRemote(nodeId, OS_COMMAND_PROMPT_WRITE, msg, 1500);
   }
@@ -126,7 +126,7 @@ public:
     return manager.readSdoLocal(nodeId, VELOCITY_ACTUAL_VALUE);
   }
 
-  int getId() const {
+  hlcanopen::NodeId getId() const {
     return nodeId;
   }
 
@@ -154,7 +154,7 @@ private:
     velocity = clampJVToSafe(velocity);
 
     folly::Future<folly::Unit> res;
-    res = send_msg_async(Td::toString("JV=", velocity), Td::toString("JV=", velocity));
+    res = send_msg_async(Td::toString("JV=", velocity));
 
     return res.then([&, velocity]() {
       if(velocity == 0) {

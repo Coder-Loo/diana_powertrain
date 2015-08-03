@@ -8,6 +8,7 @@
 #include <team_diana_lib/strings/strings.h>
 
 #include <boost/program_options.hpp>
+#include <boost/core/ignore_unused.hpp>
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -17,6 +18,7 @@ using namespace Td;
 
 bool parseCommandLine(int argc, char** argv, int& motorId) {
   using namespace boost::program_options;
+  boost::ignore_unused(motorId);
   options_description desc("Options");
   desc.add_options()
     ("help,h", "Print help messages");

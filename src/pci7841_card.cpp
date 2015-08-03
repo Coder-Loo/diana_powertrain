@@ -84,14 +84,15 @@ hlcanopen::CanMsg Pci7841Card::read()
     CAN_PACKET canPacket;
     memset(&canPacket, 0, sizeof(canPacket));
 
-    if (CanGetRcvCnt(handle) > 0 && CanRcvMsg(handle, &canPacket) == 0) {
-        auto canId = getCanId(canPacket.CAN_ID);
-        CLOG(DEBUG, "interface") << "RECEIVE: " <<
-                                 " -- COB-ID:  " << canPacket.CAN_ID <<
-                                 " can-id: " << getCanId(canPacket.CAN_ID) << " -- data: " <<
-                                 packetDataToStr(canPacket);
-    } else {
-        memset(&canPacket, 0, sizeof(canPacket));
+    while(CanGetRcvCnt(handle) > 0) {
+      if (CanRcvMsg(handle, &canPacket) == 0) {
+          CLOG(DEBUG, "interface") << "RECEIVE: " <<
+                                  " -- COB-ID:  " << canPacket.CAN_ID <<
+                                  " can-id: " << getCanId(canPacket.CAN_ID) << " -- data: " <<
+                                  packetDataToStr(canPacket);
+      } else {
+          memset(&canPacket, 0, sizeof(canPacket));
+      }
     }
     CanClearRxBuffer(handle);
 
@@ -100,6 +101,7 @@ hlcanopen::CanMsg Pci7841Card::read()
     for(BYTE i =0; i < 8; i++) {
         canMsg[i] = canPacket.data[i];
     }
+
 
     return canMsg;
 }

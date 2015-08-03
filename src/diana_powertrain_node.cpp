@@ -12,6 +12,8 @@
 #include "diana_powertrain/powertrain_manager.hpp"
 #include "diana_powertrain/pci7841_card.hpp"
 
+#include <boost/core/ignore_unused.hpp>
+
 #include <cassert>
 
 INITIALIZE_EASYLOGGINGPP
@@ -23,6 +25,8 @@ DianaPowertrainNode::DianaPowertrainNode(int argc, char** argv) :
   card(0, 0),
   manager(card)
 {
+  boost::ignore_unused(argc);
+  boost::ignore_unused(argv);
 
   // Create publisher
   velocityPublisher = n.advertise<geometry_msgs::Twist>("velocity", 1000);
@@ -74,6 +78,8 @@ bool DianaPowertrainNode::getStatusWordCallback(diana_powertrain::GetStatusWord:
 {
   // TODO: create response response, make it an array of 4 motor status value dict.
   manager.printMotorsStatusWord();
+  boost::ignore_unused(req);
+  boost::ignore_unused(res);
   return true;
 }
 
@@ -87,6 +93,7 @@ bool DianaPowertrainNode::setControlWordCallback(diana_powertrain::SetControlWor
     return false;
   }
   manager.setControlWord(command);
+  boost::ignore_unused(res);
   return true;
 }
 
@@ -95,6 +102,10 @@ bool DianaPowertrainNode::getOperationModeCallback(diana_powertrain::GetOperatio
 {
   // Improve response TODO:
   manager.printMotorsOperationMode();
+
+  boost::ignore_unused(req);
+  boost::ignore_unused(res);
+
   return true;
 }
 
@@ -106,6 +117,9 @@ bool DianaPowertrainNode::setOperationModeCallback(diana_powertrain::SetOperatio
     return false;
   }
   manager.setMotorsOperationMode(mode);
+
+  boost::ignore_unused(res);
+
   return true;
 }
 
