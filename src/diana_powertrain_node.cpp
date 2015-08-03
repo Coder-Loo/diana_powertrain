@@ -126,6 +126,10 @@ void DianaPowertrainNode::publishUpdate()
 void DianaPowertrainNode::run() {
   ros_info("starting powertrain manager");
 
+  if(!card.open()) {
+    ros_error("Unable to open p7841 card!");
+  }
+
 
   std::vector<int> motorIds;
   if(!n.hasParam("motor_ids")) {

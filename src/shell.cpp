@@ -53,6 +53,14 @@ bool parseCommandLine(int argc, char** argv, int& motorId) {
 int main(int argc, char** argv) {
   Pci7841Card card(0, 0);
   hlcanopen::CanOpenManager<Pci7841Card> canOpenManager(card, std::chrono::milliseconds(150));
+  canOpenManager.setupLogging();
+
+  if(!card.open()) {
+    ros_error("Unable to open p7841 card");
+    return -1;
+  } else {
+    ros_info("card opened");
+  }
 
   int motorId = 0;
   if(!parseCommandLine(argc, argv, motorId)) {

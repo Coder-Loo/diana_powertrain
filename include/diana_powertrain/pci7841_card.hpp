@@ -24,9 +24,12 @@ class Pci7841Card {
 public:
 
   Pci7841Card(int cardNum, int portNum);
-  Pci7841Card(const Pci7841Card& r);
+  Pci7841Card(const Pci7841Card& r) = delete;
 
   ~Pci7841Card();
+
+  bool open();
+  bool close();
 
   bool isOk();
 
@@ -38,6 +41,11 @@ private:
   std::string packetDataToStr(const CAN_PACKET& packet);
   unsigned int getCanId(long unsigned int cobId);
   unsigned int getCOBType(long unsigned int cobId);
+  int cardNum;
+  int portNum;
+
+  int redLed;
+  int greenLed;
 
 private:
   int handle;

@@ -146,6 +146,7 @@ target_link_libraries(diana_powertrain_node
    commons
    folly
    glog
+   atomic
  )
 
 add_executable(test_motor
