@@ -176,6 +176,7 @@ target_link_libraries(command_line
 
 add_executable(shell
   src/shell.cpp
+  src/CppReadline/Console.cpp
 )
 
 target_link_libraries(shell
@@ -187,6 +188,7 @@ target_link_libraries(shell
    commons
    folly
    glog
+   readline
  )
 
 install(TARGETS pci7841_card

@@ -39,6 +39,7 @@ bool Pci7841Card::open()
         CanClearRxBuffer(handle);
         CanClearTxBuffer(handle);
         CanSetLedStatus(handle, greenLed, 1);
+        CanSetLedStatus(handle, redLed, 0);
     }
     return true;
 }
