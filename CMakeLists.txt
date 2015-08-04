@@ -150,7 +150,7 @@ target_link_libraries(diana_powertrain_node
  )
 
 add_executable(test_motor
-  src/test_motor.cpp
+  src/test_motors.cpp
 )
 
 target_link_libraries(test_motor
@@ -160,6 +160,8 @@ target_link_libraries(test_motor
    pci7841_card
    commons
    glog
+   command_line
+   folly
  )
 
 add_library(command_line
