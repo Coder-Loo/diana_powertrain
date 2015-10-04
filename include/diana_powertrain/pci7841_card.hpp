@@ -2,6 +2,7 @@
 #define PCI7841CARD_H
 
 #include <hlcanopen/can_msg.hpp>
+#include <hlcanopen/can_card.hpp>
 
 #include <queue>
 
@@ -21,7 +22,7 @@ enum Pci7841Baudrate {
   BAUDRATE_1MB = 3
 };
 
-class Pci7841Card {
+class Pci7841Card : public hlcanopen::CanCard {
 
 public:
 
@@ -35,10 +36,11 @@ public:
 
   bool isOk();
 
-  hlcanopen::CanMsg read();
-  void write(const hlcanopen::CanMsg& msg);
+  hlcanopen::CanMsg read() override;
+  void write(const hlcanopen::CanMsg& msg) override;
 
 private:
+  hlcanopen::CanMsg createEmptyMsg();
   void sendCanPacket(CAN_PACKET& packet);
   std::string packetDataToStr(const CAN_PACKET& packet);
   unsigned int getCanId(long unsigned int cobId);

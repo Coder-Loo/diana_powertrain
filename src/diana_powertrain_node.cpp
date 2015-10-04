@@ -47,7 +47,6 @@ void DianaPowertrainNode::setMsgAndServicesEnabled(bool enabled)
   getOperationModeService.shutdown();
 
   if(enabled) {
-    // TODO: queue size = 1 only for testing, use 1000 after testing.
     velocitySubscriber = n.subscribe("set_velocity", 1, &DianaPowertrainNode::setVelocityCallback, this);
     enableMotorsService = n.advertiseService("enable_motors", &DianaPowertrainNode::setEnableMotorsCallback, this);
     setStatusWordService = n.advertiseService("set_control_word", &DianaPowertrainNode::setControlWordCallback, this);
@@ -64,6 +63,7 @@ void DianaPowertrainNode::setVelocityCallback(const geometry_msgs::Twist& msg) {
   if(!manager.set_velocity(msg.linear.x, msg.angular.z)) {
     ros_warn("error while setting velocity.");
   }
+  publishUpdate();
 }
 
 bool DianaPowertrainNode::setEnableMotorsCallback(diana_powertrain::EnableMotors::Request& req,
@@ -125,15 +125,13 @@ bool DianaPowertrainNode::setOperationModeCallback(diana_powertrain::SetOperatio
 
 void DianaPowertrainNode::publishUpdate()
 {
-  std::vector<Motor<Pci7841Card>>& motors = manager.getMotors();
-  for(Motor<Pci7841Card> motor : motors) {
-    float vel = motor.getVelocity().get();
-    auto it = std::find_if(motorPublishers.begin(), motorPublishers.end(), [&](const MotorPublisher& p) {
-      return p.getId() == motor.getId();
-    });
-    assert(it != motorPublishers.end());
-    MotorPublisher& publisher = *it;
-    publisher.publishVelocity(vel);
+  for(int i = 0; i < 4; i++) {
+    folly::Future<float> velocity_m_s = manager.get_velocity(i);
+    if(velocity_m_s.wait().hasValue()) {
+      motorPublishers[i].publishVelocity(velocity_m_s.value());
+    } else {
+      ros_error("unable to get veocity value");
+    }
   }
 }
 
@@ -161,14 +159,13 @@ void DianaPowertrainNode::run() {
     motorPublishers.push_back(MotorPublisher(motorId, n));
   }
 
-  //publishUpdateThread = std::unique_ptr<std::thread>(new std::thread(
-    //[&] () {
-      //while(ros::ok()) {
-        //publishUpdate();
-        //std::this_thread::sleep_for(std::chrono::milliseconds(500));
-      //}
-    //}
-  //));
+  publishUpdateThread = std::unique_ptr<std::thread>(new std::thread(
+    [&] () {
+      while(ros::ok()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      }
+    }
+  ));
 
   manager.initiate_clients(motorIds);
 

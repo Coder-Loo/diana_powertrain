@@ -7,6 +7,8 @@
 
 #include <boost/assert.hpp>
 
+using namespace hlcanopen;
+
 Pci7841Card::Pci7841Card(int cardNum, int portNum) : cardNum(cardNum), portNum(portNum), handle(-1)
 {
     std::cout << "new pci7841 card " << std::endl;
@@ -46,14 +48,14 @@ bool Pci7841Card::open()
 
 bool Pci7841Card::close()
 {
-  bool ok = true;
-  if(handle >= 0) {
-    CanSetLedStatus(handle, greenLed, 0);
-    CanSetLedStatus(handle, redLed, 0);
-    ok = CanCloseDriver(handle) == 0;
-    handle = -1;
-  }
-  return ok;
+    bool ok = true;
+    if(handle >= 0) {
+        CanSetLedStatus(handle, greenLed, 0);
+        CanSetLedStatus(handle, redLed, 0);
+        ok = CanCloseDriver(handle) == 0;
+        handle = -1;
+    }
+    return ok;
 }
 
 
@@ -62,7 +64,7 @@ bool Pci7841Card::isOk()
     return handle >= 0;
 }
 
-void Pci7841Card::write(const hlcanopen::CanMsg& msg)
+void Pci7841Card::write(const CanMsg& msg)
 {
     BOOST_ASSERT_MSG(isOk(), "p7841 is not initialized. Did you opened the card?");
     CAN_PACKET canPacket;
@@ -78,34 +80,50 @@ void Pci7841Card::write(const hlcanopen::CanMsg& msg)
     sendCanPacket(canPacket);
 }
 
-hlcanopen::CanMsg Pci7841Card::read()
+CanMsg Pci7841Card::read()
 {
     BOOST_ASSERT_MSG(isOk(), "p7841 is not initialized. Did you opened the card?");
     CAN_PACKET canPacket;
     memset(&canPacket, 0, sizeof(canPacket));
 
+    // Read all messages from the card buffer.
     while(CanGetRcvCnt(handle) > 0) {
-      if (CanRcvMsg(handle, &canPacket) == 0) {
-          CLOG(DEBUG, "interface") << "RECEIVE: " <<
-                                  " -- COB-ID:  " << canPacket.CAN_ID <<
-                                  " can-id: " << getCanId(canPacket.CAN_ID) << " -- data: " <<
-                                  packetDataToStr(canPacket);
-      } else {
-          memset(&canPacket, 0, sizeof(canPacket));
-      }
+        if (CanRcvMsg(handle, &canPacket) == 0) {
+            CLOG(DEBUG, "interface") << "RECEIVE: " <<
+                                     " -- COB-ID:  " << canPacket.CAN_ID <<
+                                     " can-id: " << getCanId(canPacket.CAN_ID) << " -- data: " <<
+                                     packetDataToStr(canPacket);
+        } else {
+            memset(&canPacket, 0, sizeof(canPacket));
+        }
+        CanMsg canMsg;
+        canMsg.cobId = COBId(getCanId(canPacket.CAN_ID), getCOBType(canPacket.CAN_ID));
+        for(BYTE i =0; i < 8; i++) {
+            canMsg[i] = canPacket.data[i];
+        }
+        msgQueue.push(canMsg);
     }
-    CanClearRxBuffer(handle);
+//     CanClearRxBuffer(handle);
 
-    hlcanopen::CanMsg canMsg;
-    canMsg.cobId = hlcanopen::COBId(getCanId(canPacket.CAN_ID), getCOBType(canPacket.CAN_ID));
-    for(BYTE i =0; i < 8; i++) {
-        canMsg[i] = canPacket.data[i];
+    // Pop one message from the queue, or return an empty message.
+    CanMsg newReceivedMsg;
+    if(msgQueue.empty()) {
+      newReceivedMsg = createEmptyMsg();
+    } else {
+      newReceivedMsg = msgQueue.front();
+      msgQueue.pop();
     }
 
-
-    return canMsg;
+    return newReceivedMsg;
 }
 
+CanMsg Pci7841Card::createEmptyMsg()
+{
+    CanMsg canMsg;
+    canMsg.cobId = COBId(0, 0);
+    canMsg.data = 0l;
+    return canMsg;
+}
 
 void Pci7841Card::sendCanPacket(CAN_PACKET& packet)
 {

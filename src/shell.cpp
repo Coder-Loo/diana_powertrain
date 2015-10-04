@@ -67,7 +67,7 @@ unsigned help(const std::vector<std::string> &) {
 
 int main(int argc, char** argv) {
     Pci7841Card card(0, 0);
-    hlcanopen::CanOpenManager<Pci7841Card> canOpenManager(card, std::chrono::milliseconds(150));
+    hlcanopen::CanOpenManager canOpenManager(card, std::chrono::milliseconds(150));
     canOpenManager.setupLogging();
 
     if(!card.open()) {
@@ -125,19 +125,26 @@ int main(int argc, char** argv) {
               }
 
               uint8_t status = res.get();
+              ros_info(Td::toString("Status is: ", (int) status));
               switch(status) {
                 case COMPLETED_NO_REPLY:
+                  ros_info("completed no reply");
                   waitingForCompletion = false;
                   break;
                 case COMPLETED_REPLY:
                 case REJECTED_REPLY: {
                     if(status == REJECTED_REPLY) {
                       ros_error("command rejected");
+                    } else {
+                      ros_info("completed reply");
                     }
                     auto res = canOpenManager.readSdoRemote<std::string>(motorId, OS_COMMAND_PROMPT_READ);
                     if(res.wait().hasValue()) {
                         std::string msg = res.value();
-                        std::cout << "\t" << msg << "<--";
+                        if(msg == "") {
+                          msg = "ok";
+                        }
+                        std::cout << "\t" << msg << " " << "<--" << std::endl;
                     } else {
                         res.getTry().withException<std::exception>(printException);
                         ros_error("unable to read response");
@@ -146,6 +153,7 @@ int main(int argc, char** argv) {
                   waitingForCompletion = false;
                   break;
                 case EXECUTING:
+                  ros_info("executing...");
                   waitingForCompletion = true;
                   break;
                 default:

@@ -119,6 +119,8 @@ add_library(commons
   src/utils.cpp
   src/consts.cpp
   src/elmo_structs.cpp
+  src/powertrain_manager.cpp
+  src/motor.cpp
 )
 
 add_library(pci7841_card
@@ -131,6 +133,7 @@ target_link_libraries(pci7841_card
   ${hlcanopen_LIBRARIES}
   pci_7841
   commons
+  pthread
 )
 
 add_executable(diana_powertrain_node
@@ -147,6 +150,7 @@ target_link_libraries(diana_powertrain_node
    folly
    glog
    atomic
+   pthread
  )
 
 add_executable(test_motor
@@ -162,7 +166,26 @@ target_link_libraries(test_motor
    glog
    command_line
    folly
+   atomic
+   pthread
  )
+
+add_executable(dump_elmo_info
+  src/dump_elmo_info.cpp
+)
+
+target_link_libraries(dump_elmo_info
+   ${catkin_LIBRARIES}
+   ${Boost_LIBRARIES}
+   ${hlcanopen_LIBRARIES}
+   pci7841_card
+   commons
+   glog
+   command_line
+   folly
+   atomic
+   pthread
+)
 
 add_library(command_line
   src/command_line.cpp
@@ -174,6 +197,7 @@ target_link_libraries(command_line
    ${hlcanopen_LIBRARIES}
    pci7841_card
    commons
+   pthread
  )
 
 add_executable(shell
@@ -191,6 +215,8 @@ target_link_libraries(shell
    folly
    glog
    readline
+   atomic
+   pthread
  )
 
 install(TARGETS pci7841_card
@@ -202,6 +228,10 @@ install(TARGETS diana_powertrain_node
 )
 
 install(TARGETS test_motor
+ DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(TARGETS dump_elmo_info
  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

@@ -40,7 +40,7 @@ private:
 private:
    ros::NodeHandle n;
    Pci7841Card card;
-   PowertrainManager<Pci7841Card> manager;
+   PowertrainManager manager;
    ros::Subscriber velocitySubscriber;
    ros::Publisher velocityPublisher;
    ros::ServiceServer enableMotorsService;

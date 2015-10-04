@@ -21,11 +21,14 @@ void prepareParseMotorId(options_description& desc) {
     ("motor_id,i", value<int>()->default_value(1)->implicit_value(false)->required(), "the CAN id of the motor to test");
 }
 
-void prepareParseMotorIds(options_description& desc) {
+void prepareParseMotorIds(options_description& desc, bool required) {
   using namespace boost::program_options;
+  auto type1 =  value<vector<string>>()->multitoken();
+  if(required) {
+    type1 = type1->required();
+  }
   desc.add_options()
-    ("motor_ids,i", value<vector<string>>()->multitoken()->
-        required(), "the CAN IDs of the motors to test");
+    ("motor_ids,i", type1, "the CAN IDs of the motors to test");
 }
 
 bool isMotorId(int id) {
@@ -46,16 +49,17 @@ bool parseMotorId(variables_map& varsMap, int& motorId) {
   return true;
 }
 
-bool parseMotorIds(variables_map& varsMap, std::vector<int>& motorIds) {
-  if(!varsMap["motor_id"].empty() && !varsMap["motor_id"].defaulted()) {
+bool parseMotorIds(variables_map& varsMap, std::vector<int>& motorIds, bool required) {
+  if(!varsMap["motor_ids"].empty() && !varsMap["motor_ids"].defaulted()) {
     vector<string> motorIdsStr;
-    motorIdsStr = varsMap["motor_id"].as<vector<string>>();
+    motorIdsStr = varsMap["motor_ids"].as<vector<string>>();
     for(const string& s : motorIdsStr) {
       try {
         int id = boost::lexical_cast<int>(s);
         motorIds.push_back(id);
       } catch(const boost::bad_lexical_cast& e) {
-         ros_error(Td::toString("unable to parse motor id: ", s, " - ", e.what()));
+         ros_error(Td::toString("unable to parse motor id: \'", s, "\' - ", e.what()));
+         return false;
       }
     }
 
@@ -63,7 +67,7 @@ bool parseMotorIds(variables_map& varsMap, std::vector<int>& motorIds) {
       ros_error("Motor id must be between >=0 and <=127");
       return false;
     }
-  } else {
+  } else if (required) {
     ros_error("No motor id specified. Use help to see usage");
     return false;
   }

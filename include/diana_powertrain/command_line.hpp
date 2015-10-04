@@ -7,9 +7,9 @@
 #include <boost/program_options.hpp>
 
 void prepareParseMotorId(boost::program_options::options_description& desc);
-void prepareParseMotorIds(boost::program_options::options_description& desc);
+void prepareParseMotorIds(boost::program_options::options_description& desc, bool required = true);
 bool parseMotorId(boost::program_options::variables_map& varsMap, int& motorId);
-bool parseMotorIds(boost::program_options::variables_map& varsMap, std::vector<int>& motorId);
+bool parseMotorIds(boost::program_options::variables_map& varsMap, std::vector<int>& motorId, bool required = true);
 bool readYesNoCommandline();
 
 #endif // COMMAND_LINE_HPP

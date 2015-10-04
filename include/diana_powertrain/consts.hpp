@@ -3,6 +3,12 @@
 
 #include <hlcanopen/types.hpp>
 
+const hlcanopen::SDOIndex ERROR_REGISTER(0x1001, 0);
+const hlcanopen::SDOIndex MANUFACTURER_DEVICE_NAME(0x1008, 0);
+const hlcanopen::SDOIndex MANUFACTURER_HARDWARE_VERSION(0x1009, 0);
+const hlcanopen::SDOIndex MANUFACTURER_SOFTWARE_VERSION(0x100A, 0);
+const hlcanopen::SDOIndex ERROR_BEHAVIOUR_READ(0x1029, 0);
+const hlcanopen::SDOIndex ERROR_BEHAVIOUR_WRITE(0x1029, 1);
 const hlcanopen::SDOIndex OS_COMMAND_MODE(0x1024, 0);
 const hlcanopen::SDOIndex OS_COMMAND_PROMPT_WRITE = hlcanopen::SDOIndex(0x1023, 1);
 const hlcanopen::SDOIndex OS_COMMAND_PROMPT_STATUS = hlcanopen::SDOIndex(0x1023, 2);
@@ -13,6 +19,7 @@ const hlcanopen::SDOIndex QUICK_STOP_OPTION_CODE = hlcanopen::SDOIndex(0x605A, 0
 const hlcanopen::SDOIndex SHUT_DOWN_OPTION_CODE = hlcanopen::SDOIndex(0x605B, 0);
 const hlcanopen::SDOIndex MODE_OF_OPERATION = hlcanopen::SDOIndex(0x6060, 0);
 const hlcanopen::SDOIndex MODE_OF_OPERATION_DISPLAY = hlcanopen::SDOIndex(0x6061, 0);
+const hlcanopen::SDOIndex VELOCITY_SENSOR_ACTUAL_VALUE = hlcanopen::SDOIndex(0x6069, 0);
 const hlcanopen::SDOIndex VELOCITY_ACTUAL_VALUE = hlcanopen::SDOIndex(0x606C, 0);
 const unsigned int VELOCITY_ACTUAL_COD_ID = 0x180;
 const hlcanopen::SDOIndex TARGET_VELOCITY = hlcanopen::SDOIndex(0x60FF, 0);
@@ -20,9 +27,10 @@ const unsigned int TARGET_VELOCITY_COB_ID = 0x200;
 // hlcanopen::SDOIndex = hlcanopen::SDOIndex(0x, 0);
 
 enum  {
-  SPEED_JV_LIMIT = 21000,
-  // Meter per second -> JV
-  MPS_JV_FACTOR = 20000 // <-- TODO: this is wrong, check actual value
+  // Maximum speed limit in JV
+  SPEED_JV_LIMIT = 55000, // 100 RPM
+  // JV / Revolution Per Second ratio.
+  JV_RPS_FACTOR = 33000 // 60 RPM
 };
 
 enum class ElmoStatus {
